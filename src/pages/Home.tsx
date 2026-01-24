@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, QrCode, Trophy } from "lucide-react";
+import { ChevronRight, QrCode, Trophy, Car, MapPin, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/parking/BottomNav";
 import ParkingCard from "@/components/parking/ParkingCard";
@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 const Home = () => {
   const navigate = useNavigate();
   const [recentSessions, setRecentSessions] = useState<ParkingSession[]>([]);
+  const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
 
   useEffect(() => {
-    // Show only completed or recent active session
     const sessions = StorageService.getSessions();
-    setRecentSessions(sessions.slice(0, 3));
+    setRecentSessions(sessions.slice(0, 5));
+    setActiveSession(StorageService.getActiveSession());
   }, []);
 
   const handleParkingClick = (session: ParkingSession) => {
@@ -21,86 +22,100 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Welcome Header */}
-      <div className="gradient-header px-4 pt-6 pb-4 rounded-b-3xl">
-        <p className="text-primary-foreground/90 text-sm">Welcome back!</p>
-      </div>
-
-      {/* Premium Banner */}
-      <div className="px-4 -mt-2">
-        <div className="gradient-primary rounded-2xl p-4 relative overflow-hidden shadow-card">
-          <div className="flex items-center gap-1 text-yellow-300 text-xs mb-2">
-            <Trophy className="w-4 h-4" />
-            <span>#1 IN INDIA</span>
+    <div className="min-h-screen bg-background pb-32 overflow-y-auto scrollbar-hide">
+      {/* Premium Header */}
+      <div className="gradient-header px-6 pt-12 pb-20 rounded-b-[3rem] relative">
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-1">
+            <p className="text-primary-foreground/70 text-xs font-bold uppercase tracking-widest">Good Morning</p>
+            <h1 className="text-primary-foreground text-3xl font-black">Find Space</h1>
           </div>
-          <h2 className="text-primary-foreground text-xl font-bold">
-            Premium Parking Solution
-          </h2>
-          <p className="text-primary-foreground/80 text-sm">
-            Trusted by 1M+ users nationwide
-          </p>
-          {/* Car illustration */}
-          <div className="absolute right-4 top-4 w-20 h-16 flex items-center justify-center bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-yellow-400/50 rounded-full blur opacity-70 animate-pulse"></div>
-              <Trophy className="w-10 h-10 text-yellow-300 relative z-10" />
-            </div>
+          <div className="w-12 h-12 bg-white/20 rounded-2xl backdrop-blur-md border border-white/30 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-white/30 transition-colors">
+            <Search className="w-6 h-6 text-primary-foreground" />
           </div>
         </div>
-      </div>
 
-      {/* Active Session Callout (Optional) */}
-      {recentSessions.some(s => s.status === 'active') && (
-        <div className="px-4 mt-4">
-          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-primary font-medium uppercase tracking-wider">Active Parking</p>
-              <h3 className="font-semibold">{recentSessions.find(s => s.status === 'active')?.vehicleName}</h3>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary"
+        {/* Floating Active Card */}
+        {activeSession && (
+          <div className="absolute left-6 right-6 -bottom-10 z-10 animate-in slide-in-from-bottom-4 duration-700">
+            <div
               onClick={() => navigate("/ticket")}
+              className="bg-white rounded-[2rem] p-5 shadow-2xl flex items-center justify-between border border-primary/5 cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
             >
-              View Ticket
-            </Button>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center relative">
+                  <Car className="w-7 h-7 text-white" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 border-4 border-white rounded-full" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-primary">Ongoing Session</span>
+                  </div>
+                  <h3 className="font-black text-foreground text-lg leading-tight uppercase">{activeSession.vehicleName}</h3>
+                  <div className="flex items-center gap-1.5 text-muted-foreground mt-0.5">
+                    <MapPin className="w-3 h-3" />
+                    <span className="text-[11px] font-bold uppercase tracking-tight">{activeSession.location}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Scan to Park */}
-      <div className="px-4 mt-4">
-        <button
-          onClick={() => navigate("/scanner")}
-          className="w-full bg-card rounded-2xl p-4 shadow-card hover:shadow-card-hover transition-all flex items-center gap-4"
-        >
-          <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
-            <QrCode className="w-8 h-8 text-primary" />
+        {!activeSession && (
+          <div className="absolute left-6 right-6 -bottom-10 z-10">
+            <div className="bg-primary-foreground rounded-[2rem] p-6 shadow-2xl border border-primary/5 flex items-center gap-4">
+              <div className="flex-1">
+                <h3 className="font-black text-primary text-lg leading-tight uppercase">Ready to park?</h3>
+                <p className="text-muted-foreground text-xs font-bold leading-relaxed mt-1">Scan the QR code at any of our outlets to begin.</p>
+              </div>
+              <Button
+                onClick={() => navigate("/scanner")}
+                className="bg-primary text-white rounded-2xl px-6 h-12 font-black uppercase text-xs"
+              >
+                Scan Now
+              </Button>
+            </div>
           </div>
-          <div className="flex-1 text-left">
-            <h3 className="font-semibold text-foreground">Scan to Park</h3>
-            <p className="text-sm text-muted-foreground">
-              Scan QR code at parking entrance
-            </p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+        )}
       </div>
 
-      {/* Recent Parking */}
-      <div className="px-4 mt-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
-          Recent Parking
-        </h2>
-        <div className="space-y-3">
+      <div className="px-6 mt-16 pb-2">
+        {/* Quick Actions / Featured Sites */}
+        <div className="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+          {[
+            { label: 'Valet Info', icon: Trophy, active: true },
+            { label: 'Fast Pass', icon: QrCode, active: false },
+            { label: 'Our Sites', icon: MapPin, active: false },
+          ].map((item, i) => (
+            <div key={i} className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] whitespace-nowrap border cursor-pointer transition-all ${item.active ? 'bg-primary border-primary shadow-lg shadow-primary/20 scale-105 ml-1' : 'bg-card border-border/50 text-muted-foreground hover:bg-muted'}`}>
+              <item.icon className={`w-5 h-5 ${item.active ? 'text-white' : 'text-primary'}`} />
+              <span className={`text-xs font-black uppercase tracking-wider ${item.active ? 'text-white' : ''}`}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* History Section */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Recent Sessions</h2>
+          <button
+            onClick={() => navigate("/history")}
+            className="text-xs font-black text-primary uppercase tracking-widest hover:opacity-70 transition-opacity"
+          >
+            View All
+          </button>
+        </div>
+
+        <div className="space-y-4">
           {recentSessions.map((session) => (
             <ParkingCard
               key={session.id}
               location={session.location}
               address={session.address}
-              date={new Date(session.entryTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              date={new Date(session.entryTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
               vehicleNumber={session.plateNumber}
               duration={session.duration || "Active"}
               amount={session.amount}
@@ -109,9 +124,10 @@ const Home = () => {
             />
           ))}
           {recentSessions.length === 0 && (
-            <p className="text-center text-muted-foreground py-8 bg-muted/20 rounded-2xl">
-              No recent parking history
-            </p>
+            <div className="text-center py-20 bg-muted/20 rounded-[2.5rem] border border-dashed border-border/50">
+              <Car className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-[0.2em]">No history found</p>
+            </div>
           )}
         </div>
       </div>

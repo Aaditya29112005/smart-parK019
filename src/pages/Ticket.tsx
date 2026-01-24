@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Car, MapPin, Clock, CreditCard, Download, Share2, AlertCircle, Hash, CheckCircle2 } from "lucide-react";
+import { Car, MapPin, Clock, CreditCard, Download, Share2, AlertCircle, Hash, CheckCircle2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/parking/BottomNav";
 import { StorageService, ParkingSession } from "@/lib/storage";
@@ -29,6 +29,13 @@ const Ticket = () => {
     }
   };
 
+  const handleAction = (action: string) => {
+    toast.info(`${action} simulation started...`);
+    setTimeout(() => {
+      toast.success(`${action} completed!`);
+    }, 1500);
+  };
+
   if (!session) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -44,120 +51,115 @@ const Ticket = () => {
     <div className="min-h-screen bg-background pb-32">
       {/* Ticket Card */}
       <div className="px-4 pt-6">
-        <div className="bg-card rounded-2xl shadow-card overflow-hidden">
+        <div className="bg-card rounded-3xl shadow-card overflow-hidden">
           {/* Header Status */}
-          <div className={`py-3 px-5 flex items-center gap-2 ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
-            {session.status === 'active' ? (
-              <Clock className="w-4 h-4" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4" />
-            )}
-            <span className="text-sm font-medium uppercase tracking-wider">
-              {session.status === 'active' ? 'Active Parking' : 'Parking Completed'}
-            </span>
+          <div className={`py-4 px-6 flex items-center justify-between ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
+            <div className="flex items-center gap-2">
+              {session.status === 'active' ? (
+                <Clock className="w-5 h-5 animate-pulse" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5" />
+              )}
+              <span className="text-sm font-bold uppercase tracking-widest">
+                {session.status === 'active' ? 'Active Parking' : 'Parking Completed'}
+              </span>
+            </div>
+            <span className="text-xs font-mono opacity-70">VALET-01</span>
           </div>
 
           {/* Ticket Details */}
-          <div className="p-5 space-y-4">
-            <div className="flex items-center gap-3 pb-3 border-b border-border">
-              <Hash className="w-5 h-5 text-muted-foreground" />
+          <div className="p-6 space-y-6 pt-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
+                <Hash className="w-6 h-6 text-primary" />
+              </div>
               <div>
-                <p className="text-xs text-muted-foreground">Ticket ID</p>
-                <p className="font-semibold text-foreground">{session.id}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Ticket ID</p>
+                <p className="font-bold text-foreground text-lg">{session.id}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pb-3 border-b border-border">
-              <Car className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Vehicle</p>
-                <p className="font-semibold text-foreground">{session.vehicleName}</p>
-                <p className="text-sm text-muted-foreground">{session.plateNumber}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Vehicle</p>
+                <p className="font-bold text-foreground">{session.vehicleName}</p>
+                <p className="text-xs font-mono bg-muted w-fit px-2 py-0.5 rounded text-muted-foreground">{session.plateNumber}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Entry Time</p>
+                <p className="font-bold text-foreground">{new Date(session.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className="text-xs text-muted-foreground">{new Date(session.entryTime).toLocaleDateString()}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pb-3 border-b border-border">
-              <MapPin className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Location</p>
-                <p className="font-semibold text-foreground">{session.location}</p>
-                <p className="text-sm text-muted-foreground">{session.address}</p>
+            {/* Simulated QR Code for Ticket */}
+            <div className="py-2 border-y border-dashed border-border ticket-cutout flex flex-col items-center gap-3">
+              <div className="w-32 h-32 bg-white p-2 rounded-xl border border-border shadow-inner">
+                <QrCode className="w-full h-full text-foreground/80" />
               </div>
+              <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest">Scan this at the checkout counter</p>
             </div>
 
-            <div className="flex items-center gap-3 pb-3 border-b border-border">
-              <Clock className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Entry Time</p>
-                <p className="font-semibold text-foreground">{new Date(session.entryTime).toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">
-                  Duration: {session.duration || "Currently Parked"}
-                </p>
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Location</p>
+                  <p className="font-bold text-foreground">{session.location}</p>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Amount</p>
-                <p className="font-bold text-xl text-foreground">₹{session.amount}</p>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Amount</p>
+                <p className="font-bold text-2xl text-primary">₹{session.amount}</p>
               </div>
             </div>
           </div>
 
           {/* Powered by */}
-          <div className="bg-muted/30 py-3 text-center">
-            <p className="text-sm text-muted-foreground">Powered by Smart Parking</p>
+          <div className="bg-muted px-6 py-4 flex items-center justify-between mt-2">
+            <p className="text-xs text-muted-foreground font-medium">Smart Park Solutions</p>
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-muted bg-primary/20" />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="px-4 mt-6 space-y-3">
+      <div className="px-5 mt-8 space-y-4">
         {session.status === 'active' && (
           <Button
             onClick={handleEndParking}
-            className="w-full gradient-primary text-primary-foreground hover:opacity-90"
+            className="w-full gradient-primary text-primary-foreground hover:opacity-90 h-14 text-lg rounded-2xl shadow-lg shadow-primary/20"
             size="lg"
           >
-            <Car className="w-5 h-5 mr-2" />
-            End Parking
+            <Car className="w-5 h-5 mr-3" />
+            Request Retrieval
           </Button>
         )}
 
-        <Button
-          variant="outline"
-          className="w-full"
-          size="lg"
-        >
-          <Download className="w-5 h-5 mr-2" />
-          Download Ticket
-        </Button>
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="rounded-2xl h-12 border-2"
+            onClick={() => handleAction("Download")}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
 
-        <Button
-          variant="outline"
-          className="w-full"
-          size="lg"
-        >
-          <Share2 className="w-5 h-5 mr-2" />
-          Share Ticket
-        </Button>
-      </div>
-
-      {/* Info Banner */}
-      {session.status === 'active' && (
-        <div className="px-4 mt-6">
-          <div className="bg-warning/10 rounded-xl p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-warning">Keep this ticket handy</p>
-              <p className="text-sm text-warning/80">
-                Show this QR code when retrieving your vehicle
-              </p>
-            </div>
-          </div>
+          <Button
+            variant="outline"
+            className="rounded-2xl h-12 border-2"
+            onClick={() => handleAction("Share")}
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Share
+          </Button>
         </div>
-      )}
+      </div>
 
       <BottomNav />
     </div>

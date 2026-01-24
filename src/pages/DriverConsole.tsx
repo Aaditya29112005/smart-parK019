@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import StatusPill from "@/components/parking/StatusPill";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { StorageService } from "@/lib/storage";
 
 type AssignmentState = "pending" | "retrieving" | "parked";
 
@@ -11,6 +12,14 @@ const DriverConsole = () => {
   const navigate = useNavigate();
   const [assignmentState, setAssignmentState] = useState<AssignmentState>("pending");
   const [retrievalProgress, setRetrievalProgress] = useState(0);
+  const [activeSession, setActiveSession] = useState<any>(null);
+
+  useEffect(() => {
+    // Look for a session that needs retrieval (completed but recently)
+    // For demo purposes, we'll just pick the first completed one
+    const completed = StorageService.getSessions().find(s => s.status === 'completed');
+    setActiveSession(completed);
+  }, []);
 
   useEffect(() => {
     if (assignmentState === "retrieving") {
@@ -18,7 +27,7 @@ const DriverConsole = () => {
         setRetrievalProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            navigate("/task-completed");
+            setTimeout(() => navigate("/task-completed"), 500);
             return 100;
           }
           return prev + 10;
@@ -32,103 +41,115 @@ const DriverConsole = () => {
     setAssignmentState("retrieving");
   };
 
+  if (!activeSession) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
+          <Bell className="w-10 h-10 text-muted-foreground opacity-20" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">No Active Assignments</h2>
+        <p className="text-muted-foreground">You'll be notified when a car needs to be retrieved.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32 overflow-y-auto">
       {/* Header */}
-      <div className="gradient-header px-4 py-6 rounded-b-3xl">
+      <div className="gradient-header px-4 py-8 rounded-b-[2.5rem]">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-primary-foreground/80 text-sm">Driver Console</p>
-            <p className="text-primary-foreground/70 text-sm mt-1">Welcome back,</p>
-            <h2 className="text-primary-foreground text-xl font-bold">Rajesh Kumar</h2>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-primary-foreground/70 bg-white/10 w-fit px-3 py-1 rounded-full backdrop-blur-md">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">On Duty</span>
+            </div>
+            <h2 className="text-primary-foreground text-2xl font-black">Rajesh Kumar</h2>
           </div>
-          <button className="relative p-2">
+          <button className="relative p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
             <Bell className="w-6 h-6 text-primary-foreground" />
+            <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-primary rounded-full" />
           </button>
         </div>
       </div>
 
       {/* Current Assignment */}
-      <div className="px-4 mt-6">
-        <h3 className="font-semibold text-foreground mb-4">Current Assignment</h3>
+      <div className="px-5 -mt-8">
+        <h3 className="font-bold text-foreground mb-4 uppercase text-xs tracking-[0.2em] opacity-60">Current Mission</h3>
 
         {assignmentState === "retrieving" ? (
           /* Retrieving State */
-          <div className="bg-card rounded-2xl p-6 shadow-card text-center">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Car className="w-10 h-10 text-primary" />
+          <div className="bg-card rounded-3xl p-8 shadow-2xl shadow-primary/10 text-center border border-primary/10">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+              <Car className="w-12 h-12 text-primary animate-bounce" />
+              <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Retrieving Vehicle...
+            <h3 className="text-2xl font-black text-foreground mb-1 uppercase tracking-tight">
+              Retrieving...
             </h3>
-            <p className="text-muted-foreground mb-1">Maruti Swift</p>
-            <p className="text-sm text-muted-foreground mb-6">MH12CD5678</p>
-            <Progress value={retrievalProgress} className="h-2" />
+            <p className="text-muted-foreground mb-8 text-sm font-medium">{activeSession.vehicleName} • {activeSession.plateNumber}</p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-primary">
+                <span>Progress</span>
+                <span>{retrievalProgress}%</span>
+              </div>
+              <Progress value={retrievalProgress} className="h-3 rounded-full bg-muted" />
+            </div>
           </div>
         ) : (
           /* Pending Retrieve Assignment */
-          <div className="bg-card rounded-2xl p-4 shadow-card">
+          <div className="bg-card rounded-3xl p-6 shadow-xl border border-border/50 animate-in slide-in-from-bottom duration-500">
             {/* Vehicle Info */}
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
-                <Car className="w-7 h-7 text-primary" />
+            <div className="flex items-center gap-5 mb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-[1.5rem] flex items-center justify-center shadow-inner">
+                <Car className="w-8 h-8 text-primary" />
               </div>
               <div>
-                <p className="font-semibold text-lg text-foreground">Maruti Swift</p>
-                <p className="text-muted-foreground">MH12CD5678</p>
+                <p className="font-black text-xl text-foreground leading-tight">{activeSession.vehicleName}</p>
+                <p className="text-muted-foreground font-mono text-sm">{activeSession.plateNumber}</p>
               </div>
             </div>
-            
-            <StatusPill variant="retrieve" className="mb-4">Retrieve Vehicle</StatusPill>
 
-            <div className="border-t border-border pt-4 space-y-3">
-              {/* Customer */}
-              <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Customer</p>
-                  <p className="font-medium text-foreground">Priya Verma</p>
-                </div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="bg-orange-100 text-orange-600 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">High Priority</span>
               </div>
+            </div>
 
+            <div className="space-y-5 mb-8">
               {/* Location */}
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="font-medium text-foreground">Phoenix Mall</p>
-                  <p className="text-sm text-muted-foreground">Lower Parel, Mumbai</p>
+                  <p className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest leading-none mb-1">Parking Slot</p>
+                  <p className="font-bold text-foreground">Level 3 • A12</p>
                 </div>
               </div>
 
-              {/* Retrieve From */}
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Retrieve from</p>
-                  <p className="font-medium text-foreground">Level 3 - A12</p>
+              {/* Customer */}
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
+                  <User className="w-5 h-5 text-muted-foreground" />
                 </div>
-              </div>
-
-              {/* Assigned At */}
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Assigned at</p>
-                  <p className="font-medium text-foreground">04:52 pm</p>
+                  <p className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest leading-none mb-1">Customer</p>
+                  <p className="font-bold text-foreground">Priya Verma</p>
                 </div>
               </div>
             </div>
 
-            <Button 
+            <Button
               onClick={handleStartRetrieval}
-              className="w-full mt-4 gradient-primary text-primary-foreground"
+              className="w-full h-14 gradient-primary text-primary-foreground text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              Start Retrieval
+              Accept & Start
             </Button>
           </div>
         )}
       </div>
+
 
       {/* Stats Footer */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-card border-t border-border px-4 py-3">

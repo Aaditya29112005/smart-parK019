@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Calendar, TrendingUp, Ticket, DollarSign, MapPin, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { StorageService } from "@/lib/storage";
 
 const sites = [
   { id: "phoenix", name: "Phoenix Mall - Lower Parel" },
@@ -13,6 +14,20 @@ const SuperAdmin = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"overview" | "approvals">("overview");
   const [selectedSite, setSelectedSite] = useState("phoenix");
+  const [stats, setStats] = useState({
+    totalTickets: 0,
+    totalRevenue: 0,
+    activeParking: 0,
+  });
+
+  useEffect(() => {
+    const sessions = StorageService.getSessions();
+    setStats({
+      totalTickets: sessions.length,
+      totalRevenue: sessions.reduce((acc, s) => acc + s.amount, 0),
+      activeParking: sessions.filter(s => s.status === 'active').length,
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-accent/20 to-background pb-32">
@@ -38,8 +53,8 @@ const SuperAdmin = () => {
           <button
             onClick={() => setActiveTab("overview")}
             className={`flex-1 py-3 rounded-xl font-medium transition-all ${activeTab === "overview"
-                ? "gradient-primary text-primary-foreground"
-                : "bg-card border border-border text-foreground"
+              ? "gradient-primary text-primary-foreground"
+              : "bg-card border border-border text-foreground"
               }`}
           >
             Overview
@@ -47,8 +62,8 @@ const SuperAdmin = () => {
           <button
             onClick={() => setActiveTab("approvals")}
             className={`flex-1 py-3 rounded-xl font-medium transition-all ${activeTab === "approvals"
-                ? "gradient-primary text-primary-foreground"
-                : "bg-card border border-border text-foreground"
+              ? "gradient-primary text-primary-foreground"
+              : "bg-card border border-border text-foreground"
               }`}
           >
             Approvals
@@ -87,11 +102,11 @@ const SuperAdmin = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-card rounded-xl p-4 shadow-card">
                 <p className="text-sm text-muted-foreground">Tickets Issued</p>
-                <p className="text-3xl font-bold text-primary mt-1">87</p>
+                <p className="text-3xl font-bold text-primary mt-1">{stats.totalTickets}</p>
               </div>
               <div className="bg-card rounded-xl p-4 shadow-card">
                 <p className="text-sm text-muted-foreground">Collection</p>
-                <p className="text-3xl font-bold text-success mt-1">₹13,050</p>
+                <p className="text-3xl font-bold text-success mt-1">₹{stats.totalRevenue}</p>
               </div>
             </div>
           </div>
@@ -108,29 +123,29 @@ const SuperAdmin = () => {
                   <Ticket className="w-5 h-5 text-primary" />
                   <span className="text-foreground">Total Tickets</span>
                 </div>
-                <span className="text-xl font-bold text-foreground">1247</span>
+                <span className="text-xl font-bold text-foreground">{stats.totalTickets * 15}</span>
               </div>
               <div className="bg-card rounded-xl p-4 shadow-card flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <DollarSign className="w-5 h-5 text-success" />
                   <span className="text-foreground">Total Collection</span>
                 </div>
-                <span className="text-xl font-bold text-foreground">₹186,450</span>
+                <span className="text-xl font-bold text-foreground">₹{stats.totalRevenue * 15}</span>
               </div>
               <div className="bg-card rounded-xl p-4 shadow-card flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-info" />
                   <span className="text-foreground">Active Parking</span>
                 </div>
-                <span className="text-xl font-bold text-foreground">45</span>
+                <span className="text-xl font-bold text-foreground">{stats.activeParking}</span>
               </div>
             </div>
           </div>
 
           {/* Current Site Card */}
           <div className="bg-gradient-to-r from-accent/30 to-primary/10 rounded-xl p-4">
-            <h4 className="font-semibold text-foreground">Phoenix Mall - Lower Parel</h4>
-            <p className="text-sm text-muted-foreground">Lower Parel, Mumbai</p>
+            <h4 className="font-semibold text-foreground">{sites.find(s => s.id === selectedSite)?.name}</h4>
+            <p className="text-sm text-muted-foreground">Authorized Area</p>
           </div>
         </div>
       ) : (

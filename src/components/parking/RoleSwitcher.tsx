@@ -24,23 +24,30 @@ const RoleSwitcher = () => {
   const currentRole = getCurrentRole();
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-card border-t border-border shadow-lg z-50">
-      <p className="text-center text-xs text-muted-foreground pt-2">Login As</p>
-      <div className="flex items-center justify-center gap-2 p-3">
+    <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-xl border-t border-border/40 shadow-2xl z-50">
+      <div className="flex flex-col items-center pt-2">
+        <div className="w-8 h-1 bg-muted rounded-full opacity-50" />
+        <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground py-2">Quick Switch Role</p>
+      </div>
+      <div className="flex items-center justify-between px-6 pb-6 pt-2">
         {roles.map((role) => {
           const isActive = currentRole === role.id;
           return (
             <button
               key={role.id}
               onClick={() => navigate(role.path)}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                isActive
-                  ? "gradient-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 relative group ${isActive
+                  ? "text-primary scale-110"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
             >
-              <role.icon className="w-5 h-5" />
-              <span className="text-xs font-medium">{role.label}</span>
+              {isActive && (
+                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-in fade-in zoom-in duration-300 role-switcher-active" />
+              )}
+              <role.icon className={`w-6 h-6 transition-transform duration-300 ${isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} />
+              <span className={`text-[10px] font-bold tracking-tight ${isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}>
+                {role.label}
+              </span>
             </button>
           );
         })}
