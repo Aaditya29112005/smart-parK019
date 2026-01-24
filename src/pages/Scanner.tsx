@@ -1,32 +1,20 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { QrCode, ScanLine } from "lucide-react";
 import VehicleCard from "@/components/parking/VehicleCard";
 import { Button } from "@/components/ui/button";
-
-const initialVehicles = [
-  { id: 1, name: "Toyota Camry", plateNumber: "MH 12 AB 1234" },
-  { id: 2, name: "Honda Civic", plateNumber: "MH 14 CD 5678" },
-];
+import { StorageService, Vehicle } from "@/lib/storage";
+import { toast } from "sonner";
 
 const Scanner = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [selectedVehicle, setSelectedVehicle] = useState<number | null>(null);
   const [scanning, setScanning] = useState(true);
-  const [vehicles, setVehicles] = useState(initialVehicles);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
-
-
-  // Use a ref or simple effect to add it ensuring uniqueness
   useEffect(() => {
-    if (location.state?.newVehicle) {
-      setVehicles(prev => {
-        if (prev.find(v => v.id === location.state.newVehicle.id)) return prev;
-        return [...prev, location.state.newVehicle];
-      });
-    }
-  }, [location.state]);
+    setVehicles(StorageService.getVehicles());
+  }, []);
 
   // Simulate scanning effect
   useEffect(() => {
@@ -36,9 +24,15 @@ const Scanner = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleVehicleSelect = (vehicle: typeof vehicles[0]) => {
+  const handleVehicleSelect = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle.id);
-    navigate("/confirm-parking", { state: { vehicle } });
+
+    // Start session
+    const session = StorageService.startSession(vehicle);
+    toast.success("Parking session started!");
+
+    // Navigate with session data
+    navigate("/ticket", { state: { session, vehicle } });
   };
 
   return (
@@ -99,6 +93,9 @@ const Scanner = () => {
               onClick={() => handleVehicleSelect(vehicle)}
             />
           ))}
+          {vehicles.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No vehicles registered</p>
+          )}
         </div>
 
         <Button

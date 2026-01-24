@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Camera, Car, User, Phone, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/parking/Header";
@@ -5,9 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StorageService } from "@/lib/storage";
+import { toast } from "sonner";
 
 const AddVehicle = () => {
     const navigate = useNavigate();
+    const [model, setModel] = useState("");
+    const [plate, setPlate] = useState("");
+    const [owner, setOwner] = useState("");
+    const [phone, setPhone] = useState("");
+    const [type, setType] = useState<"car" | "bike">("car");
+
+    const handleRegister = () => {
+        if (!model || !plate || !owner || !phone) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        const newVehicle = StorageService.addVehicle({
+            name: model,
+            plateNumber: plate,
+            type: type,
+            ownerName: owner,
+            ownerPhone: phone,
+        });
+
+        toast.success("Vehicle registered successfully!");
+        navigate("/scanner", { state: { newVehicle } });
+    };
 
     return (
         <div className="min-h-screen bg-background pb-6">
@@ -21,7 +47,11 @@ const AddVehicle = () => {
                 {/* Vehicle Type Selection */}
                 <div className="mb-6">
                     <Label className="text-foreground mb-2 block">Vehicle Type</Label>
-                    <Tabs defaultValue="car" className="w-full">
+                    <Tabs
+                        value={type}
+                        onValueChange={(v) => setType(v as "car" | "bike")}
+                        className="w-full"
+                    >
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="car">Car</TabsTrigger>
                             <TabsTrigger value="bike">Bike</TabsTrigger>
@@ -49,7 +79,13 @@ const AddVehicle = () => {
                             <Label htmlFor="model">Vehicle Model *</Label>
                             <div className="relative mt-1">
                                 <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input id="model" placeholder="e.g. Toyota Camry" className="pl-10" />
+                                <Input
+                                    id="model"
+                                    value={model}
+                                    onChange={(e) => setModel(e.target.value)}
+                                    placeholder="e.g. Toyota Camry"
+                                    className="pl-10"
+                                />
                             </div>
                         </div>
 
@@ -57,7 +93,13 @@ const AddVehicle = () => {
                             <Label htmlFor="plate">License Plate Number *</Label>
                             <div className="relative mt-1">
                                 <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input id="plate" placeholder="MH 12 AB 1234" className="pl-10 uppercase" />
+                                <Input
+                                    id="plate"
+                                    value={plate}
+                                    onChange={(e) => setPlate(e.target.value.toUpperCase())}
+                                    placeholder="MH 12 AB 1234"
+                                    className="pl-10 uppercase"
+                                />
                             </div>
                         </div>
 
@@ -65,7 +107,13 @@ const AddVehicle = () => {
                             <Label htmlFor="owner">Owner Name *</Label>
                             <div className="relative mt-1">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input id="owner" placeholder="Enter owner name" className="pl-10" />
+                                <Input
+                                    id="owner"
+                                    value={owner}
+                                    onChange={(e) => setOwner(e.target.value)}
+                                    placeholder="Enter owner name"
+                                    className="pl-10"
+                                />
                             </div>
                         </div>
 
@@ -73,7 +121,13 @@ const AddVehicle = () => {
                             <Label htmlFor="phone">Owner Phone *</Label>
                             <div className="relative mt-1">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input id="phone" placeholder="+91 98765 43210" className="pl-10" />
+                                <Input
+                                    id="phone"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="+91 98765 43210"
+                                    className="pl-10"
+                                />
                             </div>
                         </div>
                     </div>
@@ -81,14 +135,7 @@ const AddVehicle = () => {
 
                 {/* Submit Button */}
                 <Button
-                    onClick={() => {
-                        const newVehicle = {
-                            id: Date.now(),
-                            name: (document.getElementById("model") as HTMLInputElement)?.value || "New Vehicle",
-                            plateNumber: (document.getElementById("plate") as HTMLInputElement)?.value || "MH XX XX XXXX"
-                        };
-                        navigate("/scanner", { state: { newVehicle } });
-                    }}
+                    onClick={handleRegister}
                     className="w-full gradient-primary text-primary-foreground hover:opacity-90"
                     size="lg"
                 >
@@ -100,3 +147,4 @@ const AddVehicle = () => {
 };
 
 export default AddVehicle;
+

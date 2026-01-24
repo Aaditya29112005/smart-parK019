@@ -1,32 +1,69 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Car, MapPin, Clock, CreditCard, Download, Share2, AlertCircle, Hash } from "lucide-react";
+import { Car, MapPin, Clock, CreditCard, Download, Share2, AlertCircle, Hash, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/parking/BottomNav";
+import { StorageService, ParkingSession } from "@/lib/storage";
+import { toast } from "sonner";
 
 const Ticket = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [session, setSession] = useState<ParkingSession | null>(null);
 
-  // Get vehicle from state
-  const vehicle = location.state?.vehicle || {
-    name: "Toyota Camry",
-    plateNumber: "MH 12 AB 1234"
+  useEffect(() => {
+    // Priority: 1. State from navigation, 2. Get active session from storage
+    const stateSession = location.state?.session;
+    if (stateSession) {
+      setSession(stateSession);
+    } else {
+      const active = StorageService.getActiveSession();
+      setSession(active);
+    }
+  }, [location.state]);
+
+  const handleEndParking = () => {
+    if (session) {
+      StorageService.completeSession(session.id);
+      navigate("/retrieval", { state: { session } });
+    }
   };
 
-  // Remove BottomNav from this page since we have RoleSwitcher
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">No Active Ticket</h2>
+        <p className="text-muted-foreground text-center mb-6">You don't have an active parking session at the moment.</p>
+        <Button onClick={() => navigate("/")}>Go Home</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* Ticket Card */}
       <div className="px-4 pt-6">
         <div className="bg-card rounded-2xl shadow-card overflow-hidden">
+          {/* Header Status */}
+          <div className={`py-3 px-5 flex items-center gap-2 ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
+            {session.status === 'active' ? (
+              <Clock className="w-4 h-4" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4" />
+            )}
+            <span className="text-sm font-medium uppercase tracking-wider">
+              {session.status === 'active' ? 'Active Parking' : 'Parking Completed'}
+            </span>
+          </div>
+
           {/* Ticket Details */}
           <div className="p-5 space-y-4">
             <div className="flex items-center gap-3 pb-3 border-b border-border">
               <Hash className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Ticket ID</p>
-                <p className="font-semibold text-foreground">TK-{new Date().toISOString().slice(0, 10)}-{Math.floor(Math.random() * 1000)}</p>
+                <p className="font-semibold text-foreground">{session.id}</p>
               </div>
             </div>
 
@@ -34,8 +71,8 @@ const Ticket = () => {
               <Car className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Vehicle</p>
-                <p className="font-semibold text-foreground">{vehicle.name}</p>
-                <p className="text-sm text-muted-foreground">{vehicle.plateNumber}</p>
+                <p className="font-semibold text-foreground">{session.vehicleName}</p>
+                <p className="text-sm text-muted-foreground">{session.plateNumber}</p>
               </div>
             </div>
 
@@ -43,7 +80,8 @@ const Ticket = () => {
               <MapPin className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Location</p>
-                <p className="font-semibold text-foreground">Inorbit Mall</p>
+                <p className="font-semibold text-foreground">{session.location}</p>
+                <p className="text-sm text-muted-foreground">{session.address}</p>
               </div>
             </div>
 
@@ -51,16 +89,18 @@ const Ticket = () => {
               <Clock className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Entry Time</p>
-                <p className="font-semibold text-foreground">{new Date().toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Duration: Starts Now</p>
+                <p className="font-semibold text-foreground">{new Date(session.entryTime).toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">
+                  Duration: {session.duration || "Currently Parked"}
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <CreditCard className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Amount Paid</p>
-                <p className="font-bold text-xl text-foreground">₹150</p>
+                <p className="text-xs text-muted-foreground">Amount</p>
+                <p className="font-bold text-xl text-foreground">₹{session.amount}</p>
               </div>
             </div>
           </div>
@@ -74,14 +114,16 @@ const Ticket = () => {
 
       {/* Action Buttons */}
       <div className="px-4 mt-6 space-y-3">
-        <Button
-          onClick={() => navigate("/retrieval")}
-          className="w-full gradient-primary text-primary-foreground hover:opacity-90"
-          size="lg"
-        >
-          <Car className="w-5 h-5 mr-2" />
-          Get My Car
-        </Button>
+        {session.status === 'active' && (
+          <Button
+            onClick={handleEndParking}
+            className="w-full gradient-primary text-primary-foreground hover:opacity-90"
+            size="lg"
+          >
+            <Car className="w-5 h-5 mr-2" />
+            End Parking
+          </Button>
+        )}
 
         <Button
           variant="outline"
@@ -103,17 +145,19 @@ const Ticket = () => {
       </div>
 
       {/* Info Banner */}
-      <div className="px-4 mt-6">
-        <div className="bg-warning/10 rounded-xl p-4 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium text-warning">Keep this ticket handy</p>
-            <p className="text-sm text-warning/80">
-              Show this QR code when retrieving your vehicle
-            </p>
+      {session.status === 'active' && (
+        <div className="px-4 mt-6">
+          <div className="bg-warning/10 rounded-xl p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-warning">Keep this ticket handy</p>
+              <p className="text-sm text-warning/80">
+                Show this QR code when retrieving your vehicle
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <BottomNav />
     </div>

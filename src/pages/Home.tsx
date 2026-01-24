@@ -1,43 +1,24 @@
+import { useState, useEffect } from "react";
 import { ChevronRight, QrCode, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/parking/BottomNav";
 import ParkingCard from "@/components/parking/ParkingCard";
-
-const recentParkings = [
-  {
-    id: 1,
-    location: "Phoenix Mall",
-    address: "Lower Parel, Mumbai",
-    date: "8 Dec 2025",
-    vehicleNumber: "MH 12 AB 1234",
-    duration: "4h 15m",
-    amount: 180,
-    status: "completed" as const,
-  },
-  {
-    id: 2,
-    location: "Central Plaza",
-    address: "Andheri West, Mumbai",
-    date: "5 Dec 2025",
-    vehicleNumber: "MH 14 CD 5678",
-    duration: "2h 50m",
-    amount: 120,
-    status: "completed" as const,
-  },
-  {
-    id: 3,
-    location: "City Center Mall",
-    address: "Bandra East, Mumbai",
-    date: "3 Dec 2025",
-    vehicleNumber: "MH 12 AB 1234",
-    duration: "4h 30m",
-    amount: 200,
-    status: "completed" as const,
-  },
-];
+import { StorageService, ParkingSession } from "@/lib/storage";
+import { Button } from "@/components/ui/button";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [recentSessions, setRecentSessions] = useState<ParkingSession[]>([]);
+
+  useEffect(() => {
+    // Show only completed or recent active session
+    const sessions = StorageService.getSessions();
+    setRecentSessions(sessions.slice(0, 3));
+  }, []);
+
+  const handleParkingClick = (session: ParkingSession) => {
+    navigate("/ticket", { state: { session } });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -69,6 +50,26 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Active Session Callout (Optional) */}
+      {recentSessions.some(s => s.status === 'active') && (
+        <div className="px-4 mt-4">
+          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-primary font-medium uppercase tracking-wider">Active Parking</p>
+              <h3 className="font-semibold">{recentSessions.find(s => s.status === 'active')?.vehicleName}</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary"
+              onClick={() => navigate("/ticket")}
+            >
+              View Ticket
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Scan to Park */}
       <div className="px-4 mt-4">
         <button
@@ -94,16 +95,24 @@ const Home = () => {
           Recent Parking
         </h2>
         <div className="space-y-3">
-          {recentParkings.map((parking) => {
-            const { id, ...rest } = parking;
-            return (
-              <ParkingCard
-                key={id}
-                {...rest}
-                onClick={() => navigate("/ticket")}
-              />
-            );
-          })}
+          {recentSessions.map((session) => (
+            <ParkingCard
+              key={session.id}
+              location={session.location}
+              address={session.address}
+              date={new Date(session.entryTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              vehicleNumber={session.plateNumber}
+              duration={session.duration || "Active"}
+              amount={session.amount}
+              status={session.status === 'active' ? 'in-progress' : 'completed'}
+              onClick={() => handleParkingClick(session)}
+            />
+          ))}
+          {recentSessions.length === 0 && (
+            <p className="text-center text-muted-foreground py-8 bg-muted/20 rounded-2xl">
+              No recent parking history
+            </p>
+          )}
         </div>
       </div>
 

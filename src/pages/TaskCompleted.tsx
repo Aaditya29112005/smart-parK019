@@ -7,7 +7,7 @@ const TaskCompleted = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      navigate("/driver");
+      navigate("/");
     }, 2500);
     return () => clearTimeout(timeout);
   }, [navigate]);

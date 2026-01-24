@@ -1,50 +1,22 @@
+import { useState, useEffect } from "react";
 import BottomNav from "@/components/parking/BottomNav";
 import ParkingCard from "@/components/parking/ParkingCard";
-
-const parkingHistory = [
-  {
-    id: 1,
-    location: "Phoenix Mall",
-    address: "Lower Parel, Mumbai",
-    date: "8 Dec 2025",
-    vehicleNumber: "MH 12 AB 1234",
-    duration: "4h 15m",
-    amount: 180,
-    status: "completed" as const,
-  },
-  {
-    id: 2,
-    location: "Central Plaza",
-    address: "Andheri West, Mumbai",
-    date: "5 Dec 2025",
-    vehicleNumber: "MH 14 CD 5678",
-    duration: "2h 50m",
-    amount: 120,
-    status: "completed" as const,
-  },
-  {
-    id: 3,
-    location: "City Center Mall",
-    address: "Bandra East, Mumbai",
-    date: "3 Dec 2025",
-    vehicleNumber: "MH 12 AB 1234",
-    duration: "4h 30m",
-    amount: 200,
-    status: "completed" as const,
-  },
-  {
-    id: 4,
-    location: "Inorbit Mall",
-    address: "Malad West, Mumbai",
-    date: "1 Dec 2025",
-    vehicleNumber: "MH 12 AB 1234",
-    duration: "3h 15m",
-    amount: 150,
-    status: "completed" as const,
-  },
-];
+import { StorageService, ParkingSession } from "@/lib/storage";
+import { useNavigate } from "react-router-dom";
 
 const History = () => {
+  const navigate = useNavigate();
+  const [history, setHistory] = useState<ParkingSession[]>([]);
+
+  useEffect(() => {
+    const sessions = StorageService.getSessions();
+    setHistory(sessions);
+  }, []);
+
+  const handleParkingClick = (session: ParkingSession) => {
+    navigate("/ticket", { state: { session } });
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
       <div className="gradient-header px-4 py-6 rounded-b-3xl">
@@ -54,9 +26,24 @@ const History = () => {
 
       <div className="px-4 mt-6">
         <div className="space-y-3">
-          {parkingHistory.map((parking) => (
-            <ParkingCard key={parking.id} {...parking} />
+          {history.map((parking) => (
+            <ParkingCard
+              key={parking.id}
+              location={parking.location}
+              address={parking.address}
+              date={new Date(parking.entryTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              vehicleNumber={parking.plateNumber}
+              duration={parking.duration || "Active"}
+              amount={parking.amount}
+              status={parking.status === 'active' ? 'in-progress' : 'completed'}
+              onClick={() => handleParkingClick(parking)}
+            />
           ))}
+          {history.length === 0 && (
+            <div className="text-center py-12 bg-muted/20 rounded-2xl">
+              <p className="text-muted-foreground">No parking history found</p>
+            </div>
+          )}
         </div>
       </div>
 
