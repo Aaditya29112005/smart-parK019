@@ -34,27 +34,28 @@ const AppContent = () => {
   ].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-slate-800 flex items-center justify-center py-10 px-4">
-      <div className="phone-frame shadow-2xl">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="phone-frame">
         <div className="phone-notch" />
         <div className="phone-screen relative">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/scanner" element={<Scanner />} />
-            <Route path="/confirm-parking" element={<ConfirmParking />} />
-            <Route path="/ticket" element={<Ticket />} />
-            <Route path="/retrieval" element={<Retrieval />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/manager" element={<ManagerDashboard />} />
-            <Route path="/add-driver" element={<AddDriver />} />
-            <Route path="/add-vehicle" element={<AddVehicle />} />
-            <Route path="/driver" element={<DriverConsole />} />
-            <Route path="/task-completed" element={<TaskCompleted />} />
-            <Route path="/admin" element={<SuperAdmin />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="flex-1 w-full overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/scanner" element={<Scanner />} />
+              <Route path="/confirm-parking" element={<ConfirmParking />} />
+              <Route path="/ticket" element={<Ticket />} />
+              <Route path="/retrieval" element={<Retrieval />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/manager" element={<ManagerDashboard />} />
+              <Route path="/add-driver" element={<AddDriver />} />
+              <Route path="/add-vehicle" element={<AddVehicle />} />
+              <Route path="/driver" element={<DriverConsole />} />
+              <Route path="/task-completed" element={<TaskCompleted />} />
+              <Route path="/admin" element={<SuperAdmin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
           {!hideRoleSwitcher && <RoleSwitcher />}
         </div>
       </div>
