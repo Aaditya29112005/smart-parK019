@@ -15,7 +15,7 @@ const SuperAdmin = () => {
   const [selectedSite, setSelectedSite] = useState("phoenix");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-accent/20 to-background pb-6">
+    <div className="min-h-screen bg-gradient-to-b from-accent/20 to-background pb-32">
       {/* Header */}
       <div className="gradient-header px-4 py-6 rounded-b-3xl">
         <div className="flex items-center gap-3 mb-2">
@@ -37,21 +37,19 @@ const SuperAdmin = () => {
         <div className="flex gap-3">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-              activeTab === "overview"
+            className={`flex-1 py-3 rounded-xl font-medium transition-all ${activeTab === "overview"
                 ? "gradient-primary text-primary-foreground"
                 : "bg-card border border-border text-foreground"
-            }`}
+              }`}
           >
             Overview
           </button>
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-              activeTab === "approvals"
+            className={`flex-1 py-3 rounded-xl font-medium transition-all ${activeTab === "approvals"
                 ? "gradient-primary text-primary-foreground"
                 : "bg-card border border-border text-foreground"
-            }`}
+              }`}
           >
             Approvals
           </button>
@@ -138,7 +136,7 @@ const SuperAdmin = () => {
       ) : (
         <div className="px-4 mt-6">
           <h3 className="font-semibold text-foreground mb-6">Pending Driver Approvals</h3>
-          
+
           {/* Empty State */}
           <div className="bg-card rounded-2xl p-8 shadow-card text-center">
             <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">

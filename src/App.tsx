@@ -34,26 +34,29 @@ const AppContent = () => {
   ].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-slate-800 flex items-center justify-center">
-      <div className="w-full max-w-[420px] min-h-screen bg-background relative shadow-2xl">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/scanner" element={<Scanner />} />
-          <Route path="/confirm-parking" element={<ConfirmParking />} />
-          <Route path="/ticket" element={<Ticket />} />
-          <Route path="/retrieval" element={<Retrieval />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/manager" element={<ManagerDashboard />} />
-          <Route path="/add-driver" element={<AddDriver />} />
-          <Route path="/add-vehicle" element={<AddVehicle />} />
-          <Route path="/driver" element={<DriverConsole />} />
-          <Route path="/task-completed" element={<TaskCompleted />} />
-          <Route path="/admin" element={<SuperAdmin />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        {!hideRoleSwitcher && <RoleSwitcher />}
+    <div className="min-h-screen bg-slate-800 flex items-center justify-center py-10 px-4">
+      <div className="phone-frame shadow-2xl">
+        <div className="phone-notch" />
+        <div className="phone-screen relative">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/scanner" element={<Scanner />} />
+            <Route path="/confirm-parking" element={<ConfirmParking />} />
+            <Route path="/ticket" element={<Ticket />} />
+            <Route path="/retrieval" element={<Retrieval />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/manager" element={<ManagerDashboard />} />
+            <Route path="/add-driver" element={<AddDriver />} />
+            <Route path="/add-vehicle" element={<AddVehicle />} />
+            <Route path="/driver" element={<DriverConsole />} />
+            <Route path="/task-completed" element={<TaskCompleted />} />
+            <Route path="/admin" element={<SuperAdmin />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          {!hideRoleSwitcher && <RoleSwitcher />}
+        </div>
       </div>
     </div>
   );

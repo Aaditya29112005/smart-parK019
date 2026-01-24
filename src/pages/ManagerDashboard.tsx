@@ -30,15 +30,15 @@ const ManagerDashboard = () => {
   const [activeFilter, setActiveFilter] = useState("All");
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      <Header 
-        title="Manager Dashboard" 
-        showBack 
+    <div className="min-h-screen bg-background pb-32">
+      <Header
+        title="Manager Dashboard"
+        showBack
         variant="default"
         rightAction={
-          <Button 
+          <Button
             onClick={() => navigate("/add-driver")}
-            size="sm" 
+            size="sm"
             className="gradient-primary text-primary-foreground"
           >
             <UserPlus className="w-4 h-4 mr-1" />
@@ -63,8 +63,8 @@ const ManagerDashboard = () => {
         {/* Search */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input 
-            placeholder="Search by plate, customer or valet..." 
+          <Input
+            placeholder="Search by plate, customer or valet..."
             className="pl-10 rounded-xl"
           />
         </div>
@@ -75,11 +75,10 @@ const ManagerDashboard = () => {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                activeFilter === filter
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeFilter === filter
                   ? "bg-foreground text-background"
                   : "bg-card border border-border text-foreground hover:bg-muted"
-              }`}
+                }`}
             >
               {filter} {filter === "All" && "(5)"}
               {filter === "Parked" && "(3)"}
