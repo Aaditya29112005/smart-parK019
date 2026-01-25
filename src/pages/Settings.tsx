@@ -28,8 +28,8 @@ const Settings = () => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      localStorage.removeItem("pixel-park-demo-session");
+      await supabase.auth.signOut();
       toast.success("Logged out successfully");
       navigate("/auth");
     } catch (error: any) {

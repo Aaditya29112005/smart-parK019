@@ -17,6 +17,15 @@ export default function Auth() {
         e.preventDefault();
         setLoading(true);
 
+        // Demo Bypass
+        if (!isSignUp && email === "demo@pixelpark.com" && password === "password123") {
+            localStorage.setItem("pixel-park-demo-session", "true");
+            toast.success("Welcome (Demo Mode)!");
+            navigate("/");
+            setLoading(false);
+            return;
+        }
+
         try {
             if (isSignUp) {
                 const { error } = await supabase.auth.signUp({ email, password });
@@ -89,7 +98,19 @@ export default function Auth() {
                     </Button>
                 </form>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center space-y-4">
+                    <button
+                        onClick={() => {
+                            setEmail("demo@pixelpark.com");
+                            setPassword("password123");
+                            setIsSignUp(false);
+                            toast.info("Example credentials filled!");
+                        }}
+                        className="w-full h-12 rounded-xl bg-accent/30 text-accent-foreground font-bold text-xs uppercase tracking-widest hover:bg-accent/50 transition-all border border-accent/20"
+                    >
+                        Use Demo Account
+                    </button>
+
                     <button
                         onClick={() => setIsSignUp(!isSignUp)}
                         className="text-sm font-bold text-primary hover:opacity-70 transition-opacity"
