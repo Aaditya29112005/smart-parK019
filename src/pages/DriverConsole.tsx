@@ -152,7 +152,7 @@ const DriverConsole = () => {
 
 
       {/* Stats Footer */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-card border-t border-border px-4 py-3">
+      <div className="absolute bottom-0 left-0 w-full bg-card border-t border-border px-4 py-3 pb-safe">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-xs text-muted-foreground">Today</p>

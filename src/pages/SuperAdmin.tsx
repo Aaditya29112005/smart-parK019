@@ -30,9 +30,9 @@ const SuperAdmin = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-accent/20 to-background pb-32">
+    <div className="bg-gradient-to-b from-accent/20 to-background pb-10">
       {/* Header */}
-      <div className="gradient-header px-4 py-6 rounded-b-3xl">
+      <div className="gradient-header px-4 pt-safe pb-6 rounded-b-3xl">
         <div className="flex items-center gap-3 mb-2">
           <button
             onClick={() => navigate(-1)}

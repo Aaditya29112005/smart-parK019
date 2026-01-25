@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import BottomNav from "@/components/parking/BottomNav";
 import ParkingCard from "@/components/parking/ParkingCard";
 import { StorageService, ParkingSession } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
@@ -18,8 +17,8 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <div className="gradient-header px-4 py-6 rounded-b-3xl">
+    <div className="bg-background pb-20">
+      <div className="gradient-header px-4 pt-safe pb-6 rounded-b-3xl">
         <h1 className="text-xl font-bold text-primary-foreground">Parking History</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">Your past parking sessions</p>
       </div>
@@ -46,8 +45,6 @@ const History = () => {
           )}
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 };

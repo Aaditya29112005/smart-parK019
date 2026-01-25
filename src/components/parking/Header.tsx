@@ -13,11 +13,10 @@ const Header = ({ title, showBack = false, rightAction, variant = "gradient" }: 
 
   return (
     <header
-      className={`px-4 py-4 ${
-        variant === "gradient"
+      className={`px-4 pt-safe pb-4 ${variant === "gradient"
           ? "gradient-header text-primary-foreground"
           : "bg-card text-foreground border-b border-border"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

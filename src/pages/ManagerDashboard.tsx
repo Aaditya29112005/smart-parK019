@@ -44,7 +44,7 @@ const ManagerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 overflow-y-auto">
+    <div className="bg-background overscroll-contain">
       <Header
         title="Manager Dashboard"
         showBack

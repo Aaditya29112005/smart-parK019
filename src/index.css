@@ -157,34 +157,63 @@
     width: 100%;
     max-width: 420px;
     height: 850px;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 40px);
     background: hsl(var(--phone-bg));
-    border: 8px solid hsl(var(--phone-bg));
-    border-radius: 3rem;
+    border: 12px solid hsl(var(--phone-bg));
+    border-radius: 3.5rem;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), 0 20px 50px rgba(0, 0, 0, 0.5);
-  }
-
-  .phone-screen {
-    background: hsl(var(--background));
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-radius: 2.25rem;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), 0 30px 60px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
   }
 
+  .phone-screen {
+    background: hsl(var(--background));
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 2.25rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .phone-content {
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .phone-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pt-safe {
+    padding-top: 32px;
+    /* Notch compensation */
+  }
+
+  .pb-safe {
+    padding-bottom: 32px;
+    /* Bottom indicator compensation */
+  }
+
   .phone-notch {
-    width: 120px;
-    height: 28px;
+    width: 140px;
+    height: 32px;
     background: hsl(var(--phone-bg));
-    border-radius: 0 0 1rem 1rem;
+    border-radius: 0 0 1.25rem 1.25rem;
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 50;
+    z-index: 100;
   }
 }

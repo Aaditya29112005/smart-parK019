@@ -21,6 +21,8 @@ import RoleSwitcher from "./components/parking/RoleSwitcher";
 import Auth from "./pages/Auth";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
+import BottomNav from "./components/parking/BottomNav";
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -36,36 +38,60 @@ const AppContent = () => {
     "/add-vehicle"
   ].includes(location.pathname);
 
+  const showBottomNav = [
+    "/",
+    "/history",
+    "/settings",
+    "/ticket"
+  ].includes(location.pathname);
+
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="phone-frame">
         <div className="phone-notch" />
         <div className="phone-screen relative">
-          {location.pathname === "/auth" ? (
-            <Auth />
-          ) : (
-            <div className="flex-1 w-full overflow-y-auto">
-              <ProtectedRoute>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/scanner" element={<Scanner />} />
-                  <Route path="/confirm-parking" element={<ConfirmParking />} />
-                  <Route path="/ticket" element={<Ticket />} />
-                  <Route path="/retrieval" element={<Retrieval />} />
-                  <Route path="/history" element={<History />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/manager" element={<ManagerDashboard />} />
-                  <Route path="/add-driver" element={<AddDriver />} />
-                  <Route path="/add-vehicle" element={<AddVehicle />} />
-                  <Route path="/driver" element={<DriverConsole />} />
-                  <Route path="/task-completed" element={<TaskCompleted />} />
-                  <Route path="/admin" element={<SuperAdmin />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </ProtectedRoute>
-            </div>
-          )}
-          {!hideRoleSwitcher && <RoleSwitcher />}
+          <div className={`phone-content ${(showBottomNav || !hideRoleSwitcher) ? 'pb-32' : ''}`}>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route
+                path="*"
+                element={
+                  <ProtectedRoute>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/scanner" element={<Scanner />} />
+                      <Route path="/confirm-parking" element={<ConfirmParking />} />
+                      <Route path="/ticket" element={<Ticket />} />
+                      <Route path="/retrieval" element={<Retrieval />} />
+                      <Route path="/history" element={<History />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/manager" element={<ManagerDashboard />} />
+                      <Route path="/add-driver" element={<AddDriver />} />
+                      <Route path="/add-vehicle" element={<AddVehicle />} />
+                      <Route path="/driver" element={<DriverConsole />} />
+                      <Route path="/task-completed" element={<TaskCompleted />} />
+                      <Route path="/admin" element={<SuperAdmin />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+
+          {/* Layered navigation for phone frame */}
+          <div className="absolute bottom-0 left-0 w-full z-50 flex flex-col pointer-events-none">
+            {showBottomNav && (
+              <div className="pointer-events-auto">
+                <BottomNav />
+              </div>
+            )}
+            {!hideRoleSwitcher && (
+              <div className="pointer-events-auto">
+                <RoleSwitcher />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

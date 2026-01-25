@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Car, Bell, Shield, HelpCircle, LogOut, ChevronRight, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import BottomNav from "@/components/parking/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -38,8 +37,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <div className="gradient-header px-4 py-6 rounded-b-3xl">
+    <div className="bg-background pb-20">
+      <div className="gradient-header px-4 pt-safe pb-6 rounded-b-3xl">
         <h1 className="text-xl font-bold text-primary-foreground">Settings</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">Manage your account</p>
       </div>
@@ -113,8 +112,6 @@ const Settings = () => {
           </span>
         </button>
       </div>
-
-      <BottomNav />
     </div>
   );
 };

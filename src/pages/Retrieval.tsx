@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Check, Clock, Car as CarIcon, Navigation } from "lucide-react";
 import Header from "@/components/parking/Header";
 import ProgressStep from "@/components/parking/ProgressStep";
-import BottomNav from "@/components/parking/BottomNav";
 import { useLocation, useNavigate } from "react-router-dom";
 import { StorageService, ParkingSession } from "@/lib/storage";
 
@@ -53,7 +52,7 @@ const Retrieval = () => {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="bg-background">
       <Header title="Vehicle Retrieval" showBack />
 
       {/* Status Card */}
@@ -113,8 +112,6 @@ const Retrieval = () => {
           </div>
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 };

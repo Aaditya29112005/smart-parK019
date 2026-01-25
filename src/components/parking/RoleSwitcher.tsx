@@ -24,7 +24,7 @@ const RoleSwitcher = () => {
   const currentRole = getCurrentRole();
 
   return (
-    <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-xl border-t border-border/40 shadow-2xl z-50">
+    <div className="w-full bg-card/80 backdrop-blur-xl border-t border-border/40 shadow-2xl">
       <div className="flex flex-col items-center pt-2">
         <div className="w-8 h-1 bg-muted rounded-full opacity-50" />
         <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground py-2">Quick Switch Role</p>
@@ -37,8 +37,8 @@ const RoleSwitcher = () => {
               key={role.id}
               onClick={() => navigate(role.path)}
               className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 relative group ${isActive
-                  ? "text-primary scale-110"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "text-primary scale-110"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
             >
               {isActive && (

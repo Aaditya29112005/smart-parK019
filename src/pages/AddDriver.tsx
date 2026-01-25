@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 
 const AddDriver = () => {
   return (
-    <div className="min-h-screen bg-background pb-6">
+    <div className="bg-background pb-10">
       <Header title="Add Driver/Valet" showBack />
 
       <div className="px-4 pt-4">
@@ -28,7 +28,7 @@ const AddDriver = () => {
         {/* Personal Details */}
         <div className="mb-6">
           <h3 className="font-semibold text-foreground mb-4">Personal Details</h3>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="fullName">Full Name *</Label>
@@ -75,7 +75,7 @@ const AddDriver = () => {
         {/* License Details */}
         <div className="mb-6">
           <h3 className="font-semibold text-foreground mb-4">License Details</h3>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="license">Driving License Number *</Label>

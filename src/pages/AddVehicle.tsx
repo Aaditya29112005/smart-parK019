@@ -36,7 +36,7 @@ const AddVehicle = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-32">
+        <div className="bg-background pb-10">
             <Header title="Add New Vehicle" showBack />
 
             <div className="px-4 pt-4">

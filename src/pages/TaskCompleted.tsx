@@ -13,7 +13,7 @@ const TaskCompleted = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="bg-background flex items-center justify-center min-h-full">
       <div className="text-center animate-fade-in">
         <div className="w-24 h-24 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <div className="w-16 h-16 bg-success/30 rounded-full flex items-center justify-center">

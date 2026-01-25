@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Car, MapPin, Clock, CreditCard, Download, Share2, AlertCircle, Hash, CheckCircle2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import BottomNav from "@/components/parking/BottomNav";
 import { StorageService, ParkingSession } from "@/lib/storage";
 import { toast } from "sonner";
 
@@ -38,7 +37,7 @@ const Ticket = () => {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="bg-background flex flex-col items-center justify-center p-4 min-h-full">
         <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">No Active Ticket</h2>
         <p className="text-muted-foreground text-center mb-6">You don't have an active parking session at the moment.</p>
@@ -48,9 +47,9 @@ const Ticket = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="bg-background">
       {/* Ticket Card */}
-      <div className="px-4 pt-6">
+      <div className="px-4 pt-safe">
         <div className="bg-card rounded-3xl shadow-card overflow-hidden">
           {/* Header Status */}
           <div className={`py-4 px-6 flex items-center justify-between ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
@@ -160,10 +159,9 @@ const Ticket = () => {
           </Button>
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 };
+
 
 export default Ticket;

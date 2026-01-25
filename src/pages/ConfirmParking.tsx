@@ -148,10 +148,10 @@ const ConfirmParking = () => {
       </div>
 
       {/* Confirm Button */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] p-4 bg-background border-t border-border z-30">
+      <div className="absolute bottom-0 left-0 w-full p-4 bg-background border-t border-border z-30 pb-safe">
         <Button
           onClick={handleConfirmPay}
-          className="w-full gradient-primary text-primary-foreground hover:opacity-90 h-14 text-lg"
+          className="w-full gradient-primary text-primary-foreground hover:opacity-90 h-14 text-lg rounded-2xl"
           size="lg"
         >
           Confirm & Pay ₹{costBreakdown.total}
