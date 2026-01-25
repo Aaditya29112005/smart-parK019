@@ -18,6 +18,8 @@ import SuperAdmin from "./pages/SuperAdmin";
 import NotFound from "./pages/NotFound";
 import AddVehicle from "./pages/AddVehicle";
 import RoleSwitcher from "./components/parking/RoleSwitcher";
+import Auth from "./pages/Auth";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,7 @@ const AppContent = () => {
 
   // Pages that shouldn't show the role switcher
   const hideRoleSwitcher = [
+    "/auth",
     "/scanner",
     "/confirm-parking",
     "/task-completed",
@@ -38,24 +41,30 @@ const AppContent = () => {
       <div className="phone-frame">
         <div className="phone-notch" />
         <div className="phone-screen relative">
-          <div className="flex-1 w-full overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/scanner" element={<Scanner />} />
-              <Route path="/confirm-parking" element={<ConfirmParking />} />
-              <Route path="/ticket" element={<Ticket />} />
-              <Route path="/retrieval" element={<Retrieval />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/manager" element={<ManagerDashboard />} />
-              <Route path="/add-driver" element={<AddDriver />} />
-              <Route path="/add-vehicle" element={<AddVehicle />} />
-              <Route path="/driver" element={<DriverConsole />} />
-              <Route path="/task-completed" element={<TaskCompleted />} />
-              <Route path="/admin" element={<SuperAdmin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          {location.pathname === "/auth" ? (
+            <Auth />
+          ) : (
+            <div className="flex-1 w-full overflow-y-auto">
+              <ProtectedRoute>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/scanner" element={<Scanner />} />
+                  <Route path="/confirm-parking" element={<ConfirmParking />} />
+                  <Route path="/ticket" element={<Ticket />} />
+                  <Route path="/retrieval" element={<Retrieval />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/manager" element={<ManagerDashboard />} />
+                  <Route path="/add-driver" element={<AddDriver />} />
+                  <Route path="/add-vehicle" element={<AddVehicle />} />
+                  <Route path="/driver" element={<DriverConsole />} />
+                  <Route path="/task-completed" element={<TaskCompleted />} />
+                  <Route path="/admin" element={<SuperAdmin />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ProtectedRoute>
+            </div>
+          )}
           {!hideRoleSwitcher && <RoleSwitcher />}
         </div>
       </div>

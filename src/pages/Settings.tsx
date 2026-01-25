@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react";
 import { User, Car, Bell, Shield, HelpCircle, LogOut, ChevronRight, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/parking/BottomNav";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const settingsItems = [
   { icon: User, label: "Profile", path: "/profile" },
@@ -13,7 +16,26 @@ const settingsItems = [
 
 const Settings = () => {
   const navigate = useNavigate();
-  
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserEmail(user.email ?? null);
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -29,8 +51,12 @@ const Settings = () => {
             <User className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <h2 className="font-semibold text-lg text-foreground">John Doe</h2>
-            <p className="text-sm text-muted-foreground">+91 98765 43210</p>
+            <h2 className="font-semibold text-lg text-foreground truncate max-w-[200px]">
+              {userEmail ? userEmail.split('@')[0] : "User"}
+            </h2>
+            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+              {userEmail ?? "+91 98765 43210"}
+            </p>
           </div>
         </div>
       </div>
@@ -42,9 +68,8 @@ const Settings = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-4 px-4 py-4 hover:bg-muted/50 transition-colors ${
-                index !== settingsItems.length - 1 ? "border-b border-border" : ""
-              }`}
+              className={`w-full flex items-center gap-4 px-4 py-4 hover:bg-muted/50 transition-colors ${index !== settingsItems.length - 1 ? "border-b border-border" : ""
+                }`}
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <item.icon className="w-5 h-5 text-primary" />
@@ -76,7 +101,10 @@ const Settings = () => {
 
       {/* Logout */}
       <div className="px-4 mt-4">
-        <button className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-4 hover:bg-destructive/5 transition-colors">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-4 hover:bg-destructive/5 transition-colors"
+        >
           <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
             <LogOut className="w-5 h-5 text-destructive" />
           </div>
