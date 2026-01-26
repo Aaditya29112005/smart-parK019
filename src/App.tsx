@@ -90,7 +90,9 @@ const AppContent = () => {
 
       {/* Role Switcher - outside phone frame */}
       {!hideRoleSwitcher && (
-        <RoleSwitcher />
+        <div className="w-full flex justify-center">
+          <RoleSwitcher />
+        </div>
       )}
     </div>
   );

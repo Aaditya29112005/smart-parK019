@@ -20,7 +20,7 @@ const BottomNav = () => {
 
   return (
     <nav className="w-full bg-card border-t border-border shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-      <div className="flex items-center justify-around py-1 px-4 pb-safe">
+      <div className="flex items-center justify-around py-2 px-4 pb-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
