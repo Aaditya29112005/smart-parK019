@@ -29,7 +29,7 @@ const RoleSwitcher = () => {
         <div className="w-8 h-1 bg-muted rounded-full opacity-50" />
         <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground py-2">Quick Switch Role</p>
       </div>
-      <div className="flex items-center justify-between px-6 pb-6 pt-2">
+      <div className="flex items-center justify-between px-6 pb-4 pt-1">
         {roles.map((role) => {
           const isActive = currentRole === role.id;
           return (

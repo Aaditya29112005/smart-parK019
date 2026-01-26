@@ -50,7 +50,7 @@ const AppContent = () => {
       <div className="phone-frame">
         <div className="phone-notch" />
         <div className="phone-screen relative">
-          <div className={`phone-content ${(showBottomNav || !hideRoleSwitcher) ? 'pb-32' : ''}`}>
+          <div className={`phone-content ${(showBottomNav || !hideRoleSwitcher) ? 'pb-60' : ''}`}>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route
