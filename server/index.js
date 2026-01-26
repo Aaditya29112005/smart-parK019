@@ -17,7 +17,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // Handle SPA routing: serve index.html for all non-API routes
-app.get('*', (req, res) => {
+// Note: In Express 5, wildcard '*' requires a name or specific regex syntax
+app.get('(.*)', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
