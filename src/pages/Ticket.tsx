@@ -47,9 +47,9 @@ const Ticket = () => {
   }
 
   return (
-    <div className="bg-background">
+    <div className="bg-background pb-20">
       {/* Ticket Card */}
-      <div className="px-4 pt-safe">
+      <div className="px-4 pt-10">
         <div className="bg-card rounded-3xl shadow-card overflow-hidden">
           {/* Header Status */}
           <div className={`py-4 px-6 flex items-center justify-between ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>

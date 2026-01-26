@@ -79,16 +79,16 @@ const AppContent = () => {
             </Routes>
           </div>
 
-          {/* Layered navigation for phone frame */}
+          {/* Layered navigation for phone frame - Priority Nav at bottom */}
           <div className="absolute bottom-0 left-0 w-full z-50 flex flex-col pointer-events-none">
-            {showBottomNav && (
-              <div className="pointer-events-auto">
-                <BottomNav />
-              </div>
-            )}
             {!hideRoleSwitcher && (
               <div className="pointer-events-auto">
                 <RoleSwitcher />
+              </div>
+            )}
+            {showBottomNav && (
+              <div className="pointer-events-auto">
+                <BottomNav />
               </div>
             )}
           </div>

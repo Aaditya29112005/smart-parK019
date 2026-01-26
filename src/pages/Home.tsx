@@ -23,7 +23,7 @@ const Home = () => {
   return (
     <div className="bg-background">
       {/* Premium Header */}
-      <div className="gradient-header px-6 pt-safe pb-20 rounded-b-[3rem] relative">
+      <div className="gradient-header px-6 pt-16 pb-20 rounded-b-[3rem] relative">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <p className="text-primary-foreground/70 text-xs font-bold uppercase tracking-widest">Good Morning</p>

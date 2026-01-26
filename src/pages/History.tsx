@@ -17,8 +17,8 @@ const History = () => {
   };
 
   return (
-    <div className="bg-background pb-20">
-      <div className="gradient-header px-4 pt-safe pb-6 rounded-b-3xl">
+    <div className="bg-background pb-20 pt-4">
+      <div className="gradient-header px-4 pt-10 pb-8 rounded-b-3xl">
         <h1 className="text-xl font-bold text-primary-foreground">Parking History</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">Your past parking sessions</p>
       </div>

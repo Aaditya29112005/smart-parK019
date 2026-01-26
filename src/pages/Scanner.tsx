@@ -47,7 +47,7 @@ const Scanner = () => {
   };
 
   return (
-    <div className="bg-slate-900 flex flex-col pt-safe">
+    <div className="bg-slate-900 flex flex-col pt-8">
       {/* Scanner Area */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {/* Camera Background Simulation */}
