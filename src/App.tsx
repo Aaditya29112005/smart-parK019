@@ -79,21 +79,19 @@ const AppContent = () => {
             </Routes>
           </div>
 
-          {/* Layered navigation container at bottom */}
-          <div className="absolute bottom-0 left-0 w-full z-50 pointer-events-none bg-card/95 backdrop-blur-md border-t border-border/50 pb-10">
-            {!hideRoleSwitcher && (
-              <div className="pointer-events-auto border-b border-border/20">
-                <RoleSwitcher />
-              </div>
-            )}
-            {showBottomNav && (
-              <div className="pointer-events-auto">
-                <BottomNav />
-              </div>
-            )}
-          </div>
+          {/* Native Bottom Navigation - inside phone-screen */}
+          {showBottomNav && (
+            <div className="absolute bottom-0 left-0 w-full z-50">
+              <BottomNav />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Role Switcher - outside phone frame */}
+      {!hideRoleSwitcher && (
+        <RoleSwitcher />
+      )}
     </div>
   );
 };

@@ -24,28 +24,24 @@ const RoleSwitcher = () => {
   const currentRole = getCurrentRole();
 
   return (
-    <div className="w-full py-2">
-      <div className="flex flex-col items-center">
-        <div className="w-8 h-1 bg-muted rounded-full opacity-50" />
-        <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground py-2">Quick Switch Role</p>
+    <div className="bg-white rounded-[2rem] p-6 shadow-2xl border border-white/20 w-full max-w-[420px] animate-in fade-in slide-in-from-bottom duration-500">
+      <div className="flex flex-col items-center mb-6">
+        <p className="text-sm font-semibold text-slate-500">Login As</p>
       </div>
-      <div className="flex items-center justify-between px-6">
+      <div className="grid grid-cols-4 gap-3">
         {roles.map((role) => {
           const isActive = currentRole === role.id;
           return (
             <button
               key={role.id}
               onClick={() => navigate(role.path)}
-              className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 relative group ${isActive
-                ? "text-primary scale-110"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300 relative group ${isActive
+                ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
+                : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                 }`}
             >
-              {isActive && (
-                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-in fade-in zoom-in duration-300 role-switcher-active" />
-              )}
-              <role.icon className={`w-6 h-6 transition-transform duration-300 ${isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} />
-              <span className={`text-[10px] font-bold tracking-tight ${isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}>
+              <role.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
+              <span className="text-[10px] font-bold">
                 {role.label}
               </span>
             </button>
