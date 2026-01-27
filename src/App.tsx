@@ -46,11 +46,11 @@ const AppContent = () => {
   ].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 gap-8">
       <div className="phone-frame">
         <div className="phone-notch" />
         <div className="phone-screen relative">
-          <div className={`phone-content ${(showBottomNav || !hideRoleSwitcher) ? 'pb-60' : ''}`}>
+          <div className={`phone-content ${(showBottomNav || !hideRoleSwitcher) ? 'pb-20' : ''}`}>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route
@@ -88,9 +88,9 @@ const AppContent = () => {
         </div>
       </div>
 
-      {/* Role Switcher - outside phone frame */}
+      {/* Role Switcher - below phone frame */}
       {!hideRoleSwitcher && (
-        <div className="w-full flex justify-center">
+        <div className="w-full max-w-[420px] pb-4">
           <RoleSwitcher />
         </div>
       )}
