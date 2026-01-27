@@ -53,14 +53,15 @@ const MapExplorer = () => {
 
     const speak = (text: string) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.1;
-        utterance.pitch = 1.1;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.lang = 'en-IN';
         window.speechSynthesis.speak(utterance);
     };
 
     const MAGIC_LOCATIONS = [
-        "Phoenix Palladium", "Jio World", "Oberoi Mall", "Select Citywalk",
-        "DLF Cyberhub", "UB City", "Inorbit Mall", "Quest Mall",
+        "Phoenix Palladium", "Palladium Mall", "Jio World", "Jio Drive", "Oberoi Mall", "Select Citywalk",
+        "DLF Cyberhub", "DLF Cyber Hub", "UB City", "Inorbit Mall", "Quest Mall",
         "Gateway of India", "Marine Drive", "Saket District", "Orion Mall", "Park Street"
     ];
 

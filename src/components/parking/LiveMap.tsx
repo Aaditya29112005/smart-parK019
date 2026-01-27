@@ -101,6 +101,28 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         }
     }, [liveLat, liveLng]);
 
+    const selectLocation = useCallback((lat: number, lng: number, name: string) => {
+        setSearchResults({ lat, lng, name });
+        setSearchQuery(name);
+        setShowSuggestions(false);
+
+        if (liveLat && liveLng) {
+            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${lng},${lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`)
+                .then(res => res.json())
+                .then(directionsData => {
+                    if (directionsData.routes && directionsData.routes.length > 0) {
+                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+                        setRouteCoords(coords);
+                    }
+                });
+        }
+
+        setView({
+            center: [lat, lng],
+            zoom: 16
+        });
+    }, [liveLat, liveLng]);
+
     const executeSearch = useCallback(async (query: string) => {
         if (!query.trim()) return;
         setSearchQuery(query);
@@ -132,28 +154,6 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
             console.error("Search or routing failed:", err);
         }
     }, [liveLat, liveLng, selectLocation]);
-
-    const selectLocation = useCallback((lat: number, lng: number, name: string) => {
-        setSearchResults({ lat, lng, name });
-        setSearchQuery(name);
-        setShowSuggestions(false);
-
-        if (liveLat && liveLng) {
-            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${lng},${lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`)
-                .then(res => res.json())
-                .then(directionsData => {
-                    if (directionsData.routes && directionsData.routes.length > 0) {
-                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
-                        setRouteCoords(coords);
-                    }
-                });
-        }
-
-        setView({
-            center: [lat, lng],
-            zoom: 16
-        });
-    }, [liveLat, liveLng]);
 
     useImperativeHandle(ref, () => ({
         recenter,
