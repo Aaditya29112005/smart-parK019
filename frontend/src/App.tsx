@@ -32,7 +32,7 @@ import HelpSupport from "./pages/account/HelpSupport";
 import BottomNav from "./components/parking/BottomNav";
 import AIChatbot from "./components/parking/AIChatbot";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +43,12 @@ const AppContent = () => {
 
   useEffect(() => {
     const fetchSession = async () => {
+      // Only attempt Supabase connection if properly configured
+      if (!isSupabaseConfigured) {
+        console.log("📱 Running in demo mode - Supabase not configured");
+        return;
+      }
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
@@ -54,12 +60,15 @@ const AppContent = () => {
     fetchSession();
     setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
-    });
+    // Only set up auth listener if Supabase is configured
+    if (isSupabaseConfigured) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+        setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
   const isAuthenticated = !!session || isDemo;
