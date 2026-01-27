@@ -35,6 +35,11 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Real-time Location Map */}
+        <div className="h-[180px] w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-1 border border-white/20 overflow-hidden shadow-xl mb-2">
+          <LiveMap />
+        </div>
+
         {/* Floating Active Card */}
         {activeSession && (
           <div className="absolute left-6 right-6 -bottom-10 z-10 animate-in slide-in-from-bottom-4 duration-700">
@@ -98,13 +103,6 @@ const Home = () => {
           ))}
         </div>
 
-        {/* Live Map Section */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Live Map</h2>
-        </div>
-        <div className="h-[250px] mb-10">
-          <LiveMap />
-        </div>
 
         {/* History Section */}
         <div className="flex items-center justify-between mb-6">
