@@ -10,6 +10,14 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
+            // Check for demo session first
+            const isDemo = localStorage.getItem("pixel-park-demo-session") === "true";
+            if (isDemo) {
+                setAuthenticated(true);
+                setLoading(false);
+                return;
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setAuthenticated(true);
@@ -25,8 +33,12 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             if (session) {
                 setAuthenticated(true);
             } else {
-                setAuthenticated(false);
-                navigate("/auth");
+                // Only redirect if not in demo mode
+                const isDemo = localStorage.getItem("pixel-park-demo-session") === "true";
+                if (!isDemo) {
+                    setAuthenticated(false);
+                    navigate("/auth");
+                }
             }
         });
 

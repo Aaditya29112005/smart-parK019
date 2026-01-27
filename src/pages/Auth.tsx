@@ -144,7 +144,7 @@ export default function Auth() {
                             <div className="flex-1 h-px bg-border/50" />
                         </div>
 
-                        <div className="mt-6">
+                        <div className="mt-6 grid grid-cols-1 gap-3">
                             <button
                                 type="button"
                                 onClick={handleGoogleLogin}
@@ -157,6 +157,17 @@ export default function Auth() {
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                 </svg>
                                 <span className="text-xs font-black uppercase tracking-widest text-slate-600">Google Login</span>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    localStorage.setItem("pixel-park-demo-session", "true");
+                                    toast.success("Welcome (Demo Mode)!");
+                                    navigate("/");
+                                }}
+                                className="w-full h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-200 transition-all active:scale-95"
+                            >
+                                Demo Access
                             </button>
                         </div>
                     </>
