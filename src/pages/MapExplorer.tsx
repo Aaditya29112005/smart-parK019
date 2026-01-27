@@ -27,7 +27,7 @@ const MapExplorer = () => {
             recognitionRef.current = new SpeechRecognition();
             recognitionRef.current.continuous = false;
             recognitionRef.current.interimResults = true;
-            recognitionRef.current.lang = 'en-US';
+            recognitionRef.current.lang = 'en-IN';
 
             recognitionRef.current.onresult = (event: any) => {
                 const current = event.resultIndex;

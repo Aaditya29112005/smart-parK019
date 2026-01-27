@@ -105,6 +105,18 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         if (!query.trim()) return;
         setSearchQuery(query);
 
+        // Priority 1: Check internal mock spots
+        const mockSpot = MOCK_PARKING_SPOTS.find(s =>
+            s.name.toLowerCase().includes(query.toLowerCase()) ||
+            query.toLowerCase().includes(s.name.toLowerCase())
+        );
+
+        if (mockSpot) {
+            selectLocation(mockSpot.lat, mockSpot.lng, mockSpot.name);
+            return;
+        }
+
+        // Priority 2: External Geocoding
         try {
             const geoResponse = await fetch(
                 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`
@@ -119,7 +131,7 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         } catch (err) {
             console.error("Search or routing failed:", err);
         }
-    }, [liveLat, liveLng]);
+    }, [liveLat, liveLng, selectLocation]);
 
     const selectLocation = useCallback((lat: number, lng: number, name: string) => {
         setSearchResults({ lat, lng, name });
