@@ -7,23 +7,12 @@ import { useState, useRef } from "react";
 const MapExplorer = () => {
     const navigate = useNavigate();
     const mapRef = useRef<LiveMapRef>(null);
-    const [isSearching, setIsSearching] = useState(false);
-
-    const handleSearchNearMe = () => {
-        setIsSearching(true);
-        mapRef.current?.recenter();
-
-        // Mock searching animation
-        setTimeout(() => {
-            setIsSearching(false);
-        }, 2000);
-    };
 
     return (
         <div className="h-full w-full bg-background flex flex-col relative overflow-hidden">
             {/* Full Screen Map Container */}
             <div className="absolute inset-0 z-0 text-white">
-                <LiveMap ref={mapRef} hideSearch={true} hideRecenter={true} />
+                <LiveMap ref={mapRef} hideSearch={true} hideRecenter={false} />
             </div>
 
             {/* Top Bar - Header Area */}
@@ -52,24 +41,6 @@ const MapExplorer = () => {
                     <Button className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl flex items-center justify-center text-slate-600 hover:text-primary active:scale-95 transition-all">
                         <Filter className="w-5 h-5" />
                     </Button>
-                </div>
-
-                {/* Search Near Me FAB - Mobile Style */}
-                <div
-                    onClick={handleSearchNearMe}
-                    className={`px-6 h-14 rounded-[2rem] shadow-2xl flex items-center gap-2 pointer-events-auto cursor-pointer transition-all active:scale-95 ${isSearching
-                            ? 'bg-purple-600 ring-4 ring-purple-500/20'
-                            : 'bg-primary hover:bg-primary/90 shadow-primary/30'
-                        }`}
-                >
-                    {isSearching ? (
-                        <Loader2 className="w-5 h-5 text-white animate-spin" />
-                    ) : (
-                        <Search className="w-5 h-5 text-white" />
-                    )}
-                    <span className="text-white text-xs font-black uppercase tracking-widest">
-                        {isSearching ? 'Searching...' : 'Search Near Me'}
-                    </span>
                 </div>
             </div>
         </div>

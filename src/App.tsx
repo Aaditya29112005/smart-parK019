@@ -22,6 +22,13 @@ import RoleSwitcher from "./components/parking/RoleSwitcher";
 import Auth from "./pages/Auth";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
+// Account Pages
+import Profile from "./pages/account/Profile";
+import MyVehicles from "./pages/account/MyVehicles";
+import Notifications from "./pages/account/Notifications";
+import PrivacySecurity from "./pages/account/PrivacySecurity";
+import HelpSupport from "./pages/account/HelpSupport";
+
 import BottomNav from "./components/parking/BottomNav";
 import AIChatbot from "./components/parking/AIChatbot";
 
@@ -74,6 +81,14 @@ const AppContent = () => {
                       <Route path="/task-completed" element={<TaskCompleted />} />
                       <Route path="/admin" element={<SuperAdmin />} />
                       <Route path="/map" element={<MapExplorer />} />
+
+                      {/* Account Routes */}
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/vehicles" element={<MyVehicles />} />
+                      <Route path="/notifications" element={<Notifications />} />
+                      <Route path="/privacy" element={<PrivacySecurity />} />
+                      <Route path="/help" element={<HelpSupport />} />
+
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </ProtectedRoute>
