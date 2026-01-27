@@ -58,6 +58,14 @@ export interface LiveMapRef {
     search: (query: string) => Promise<void>;
 }
 
+const MOCK_PARKING_SPOTS = [
+    { id: "p1", lat: 18.9942, lng: 72.8258, name: "Phoenix Palladium Parking" },
+    { id: "p2", lat: 19.0634, lng: 72.8596, name: "Jio World Drive Parking" },
+    { id: "p3", lat: 19.1741, lng: 72.8601, name: "Oberoi Mall Parking" },
+    { id: "p4", lat: 18.9220, lng: 72.8347, name: "Gateway Public Parking" },
+    { id: "p5", lat: 18.9430, lng: 72.8231, name: "Marine Drive Parking" },
+];
+
 const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hideRecenter = false }, ref) => {
     const { latitude: liveLat, longitude: liveLng, error, loading } = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
@@ -65,7 +73,7 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
     const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
     const [view, setView] = useState({
         center: [19.0760, 72.8777] as [number, number], // Default Mumbai
-        zoom: 15
+        zoom: 13
     });
 
     const recenter = useCallback(() => {
@@ -90,27 +98,33 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
             if (geoData.features && geoData.features.length > 0) {
                 const [destLng, destLat] = geoData.features[0].center;
                 const name = geoData.features[0].place_name;
-                setSearchResults({ lat: destLat, lng: destLng, name });
-
-                if (liveLat && liveLng) {
-                    const directionsResponse = await fetch(
-                        `https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${destLng},${destLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
-                    );
-                    const directionsData = await directionsResponse.json();
-                    if (directionsData.routes && directionsData.routes.length > 0) {
-                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
-                        setRouteCoords(coords);
-                    }
-                }
-
-                setView({
-                    center: [destLat, destLng],
-                    zoom: 16
-                });
+                selectLocation(destLat, destLng, name);
             }
         } catch (err) {
             console.error("Search or routing failed:", err);
         }
+    }, [liveLat, liveLng]);
+
+    const selectLocation = useCallback((lat: number, lng: number, name: string) => {
+        setSearchResults({ lat, lng, name });
+        setSearchQuery(name);
+        setShowSuggestions(false);
+
+        if (liveLat && liveLng) {
+            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${lng},${lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`)
+                .then(res => res.json())
+                .then(directionsData => {
+                    if (directionsData.routes && directionsData.routes.length > 0) {
+                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+                        setRouteCoords(coords);
+                    }
+                });
+        }
+
+        setView({
+            center: [lat, lng],
+            zoom: 16
+        });
     }, [liveLat, liveLng]);
 
     useImperativeHandle(ref, () => ({
@@ -157,29 +171,8 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
     };
 
     const selectSuggestion = (suggestion: { place_name: string; center: [number, number] }) => {
-        setSearchQuery(suggestion.place_name);
-        setSuggestions([]);
-        setShowSuggestions(false);
-
-        // Use the center from suggestion directly to avoid another geocode call
-        const [destLng, destLat] = suggestion.center;
-        setSearchResults({ lat: destLat, lng: destLng, name: suggestion.place_name });
-
-        if (liveLat && liveLng) {
-            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${destLng},${destLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`)
-                .then(res => res.json())
-                .then(directionsData => {
-                    if (directionsData.routes && directionsData.routes.length > 0) {
-                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
-                        setRouteCoords(coords);
-                    }
-                });
-        }
-
-        setView({
-            center: [destLat, destLng],
-            zoom: 16
-        });
+        const [lng, lat] = suggestion.center;
+        selectLocation(lat, lng, suggestion.place_name);
     };
 
     const clearSearch = () => {
@@ -306,8 +299,20 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                     />
                 )}
 
+                {/* Mock Parking Markers */}
+                {MOCK_PARKING_SPOTS.map((spot) => (
+                    <Marker
+                        key={spot.id}
+                        position={[spot.lat, spot.lng]}
+                        icon={createCustomIcon('search')}
+                        eventHandlers={{
+                            click: () => selectLocation(spot.lat, spot.lng, spot.name),
+                        }}
+                    />
+                ))}
+
                 {/* Searched Position Marker */}
-                {searchResults && (
+                {searchResults && !MOCK_PARKING_SPOTS.find(m => m.lat === searchResults.lat) && (
                     <Marker
                         position={[searchResults.lat, searchResults.lng]}
                         icon={createCustomIcon('search')}
