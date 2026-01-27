@@ -15,6 +15,7 @@ import AddDriver from "./pages/AddDriver";
 import DriverConsole from "./pages/DriverConsole";
 import TaskCompleted from "./pages/TaskCompleted";
 import SuperAdmin from "./pages/SuperAdmin";
+import MapExplorer from "./pages/MapExplorer";
 import NotFound from "./pages/NotFound";
 import AddVehicle from "./pages/AddVehicle";
 import RoleSwitcher from "./components/parking/RoleSwitcher";
@@ -72,6 +73,7 @@ const AppContent = () => {
                       <Route path="/driver" element={<DriverConsole />} />
                       <Route path="/task-completed" element={<TaskCompleted />} />
                       <Route path="/admin" element={<SuperAdmin />} />
+                      <Route path="/map" element={<MapExplorer />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </ProtectedRoute>
