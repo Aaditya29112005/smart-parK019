@@ -14,7 +14,8 @@ const Profile = () => {
         name: "",
         email: "",
         phone: "+91 98765 43210",
-        address: "Mumbai, Maharashtra, India"
+        address: "Mumbai, Maharashtra, India",
+        avatarUrl: ""
     });
 
     useEffect(() => {
@@ -74,12 +75,32 @@ const Profile = () => {
                 {/* Profile Picture Placeholder */}
                 <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
                     <div className="relative group">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            id="avatar-input"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    setProfile(prev => ({ ...prev, avatarUrl: URL.createObjectURL(file) }));
+                                    toast.success("Profile visual updated");
+                                }
+                            }}
+                        />
                         <div className="w-32 h-32 rounded-[2.5rem] bg-white p-1.5 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform">
                             <div className="w-full h-full rounded-[2.2rem] bg-slate-100 flex items-center justify-center overflow-hidden">
-                                <User className="w-12 h-12 text-slate-300" />
+                                {profile.avatarUrl ? (
+                                    <img src={profile.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="w-12 h-12 text-slate-300" />
+                                )}
                             </div>
                         </div>
-                        <button className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-2xl border-4 border-white flex items-center justify-center text-white shadow-lg active:scale-95 transition-all">
+                        <button
+                            onClick={() => document.getElementById('avatar-input')?.click()}
+                            className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-2xl border-4 border-white flex items-center justify-center text-white shadow-lg active:scale-95 transition-all"
+                        >
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
