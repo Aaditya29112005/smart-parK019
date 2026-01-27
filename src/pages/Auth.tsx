@@ -69,8 +69,8 @@ export default function Auth() {
     };
 
     return (
-        <div className="flex-1 bg-slate-900 flex flex-col items-center justify-center p-6 pt-safe pb-safe overflow-y-auto">
-            <div className="w-full max-w-md bg-card rounded-[2.5rem] p-8 shadow-2xl border border-border/50 animate-in fade-in zoom-in duration-500 my-auto">
+        <div className="flex-1 bg-background flex flex-col items-center justify-center pt-safe pb-safe overflow-y-auto">
+            <div className="w-full h-full sm:h-auto max-w-md bg-card sm:rounded-[2.5rem] p-8 sm:shadow-2xl sm:border border-border/50 animate-in fade-in zoom-in duration-500 flex flex-col justify-center">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-inner">
                         <BrainCircuit className="w-8 h-8 text-primary" />
