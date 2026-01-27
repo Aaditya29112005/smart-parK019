@@ -60,32 +60,32 @@ export interface LiveMapRef {
 
 const MOCK_PARKING_SPOTS = [
     // Mumbai
-    { id: "p1", lat: 18.9942, lng: 72.8258, name: "Phoenix Palladium Parking" },
-    { id: "p2", lat: 19.0634, lng: 72.8596, name: "Jio World Drive Parking" },
-    { id: "p3", lat: 19.1741, lng: 72.8601, name: "Oberoi Mall Parking" },
+    { id: "p1", lat: 18.9942, lng: 72.8258, name: "Phoenix Palladium Parking", capacity: 150, occupied: 82 },
+    { id: "p2", lat: 19.0634, lng: 72.8596, name: "Jio World Drive Parking", capacity: 300, occupied: 245 },
+    { id: "p3", lat: 19.1741, lng: 72.8601, name: "Oberoi Mall Parking", capacity: 200, occupied: 45 },
     // Delhi/NCR
-    { id: "p6", lat: 28.5672, lng: 77.2100, name: "Select CITYWALK Parking" },
-    { id: "p7", lat: 28.4595, lng: 77.0266, name: "DLF CyberHub Parking" },
-    { id: "p8", lat: 28.5326, lng: 77.2100, name: "Saket District Centre" },
+    { id: "p6", lat: 28.5672, lng: 77.2100, name: "Select CITYWALK Parking", capacity: 500, occupied: 412 },
+    { id: "p7", lat: 28.4595, lng: 77.0266, name: "DLF CyberHub Parking", capacity: 400, occupied: 120 },
+    { id: "p8", lat: 28.5326, lng: 77.2100, name: "Saket District Centre", capacity: 250, occupied: 230 },
     // Bangalore
-    { id: "p9", lat: 12.9716, lng: 77.5946, name: "UB City Parking" },
-    { id: "p10", lat: 12.9345, lng: 77.6111, name: "Forum South India Parking" },
-    { id: "p11", lat: 13.0113, lng: 77.5550, name: "Orion Mall Parking" },
+    { id: "p9", lat: 12.9716, lng: 77.5946, name: "UB City Parking", capacity: 180, occupied: 165 },
+    { id: "p10", lat: 12.9345, lng: 77.6111, name: "Forum South India Parking", capacity: 350, occupied: 290 },
+    { id: "p11", lat: 13.0113, lng: 77.5550, name: "Orion Mall Parking", capacity: 220, occupied: 110 },
     // Hyderabad
-    { id: "p12", lat: 17.4348, lng: 78.3866, name: "Inorbit Mall Parking" },
-    { id: "p13", lat: 17.3850, lng: 78.4867, name: "Charminar Public Parking" },
+    { id: "p12", lat: 17.4348, lng: 78.3866, name: "Inorbit Mall Parking", capacity: 450, occupied: 380 },
+    { id: "p13", lat: 17.3850, lng: 78.4867, name: "Charminar Public Parking", capacity: 100, occupied: 95 },
     // Kolkata
-    { id: "p14", lat: 22.5392, lng: 88.3519, name: "Quest Mall Parking" },
-    { id: "p15", lat: 22.5726, lng: 88.3639, name: "Park Street Parking" },
+    { id: "p14", lat: 22.5392, lng: 88.3519, name: "Quest Mall Parking", capacity: 280, occupied: 210 },
+    { id: "p15", lat: 22.5726, lng: 88.3639, name: "Park Street Parking", capacity: 120, occupied: 115 },
     // General
-    { id: "p4", lat: 18.9220, lng: 72.8347, name: "Gateway Public Parking" },
-    { id: "p5", lat: 18.9430, lng: 72.8231, name: "Marine Drive Parking" },
+    { id: "p4", lat: 18.9220, lng: 72.8347, name: "Gateway Public Parking", capacity: 80, occupied: 72 },
+    { id: "p5", lat: 18.9430, lng: 72.8231, name: "Marine Drive Parking", capacity: 150, occupied: 140 },
 ];
 
 const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hideRecenter = false }, ref) => {
     const { latitude: liveLat, longitude: liveLng, error, loading } = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string } | null>(null);
+    const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string; capacity: number; occupied: number } | null>(null);
     const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
     const [view, setView] = useState({
         center: [20.5937, 78.9629] as [number, number], // Center of India
@@ -101,8 +101,12 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         }
     }, [liveLat, liveLng]);
 
-    const selectLocation = useCallback((lat: number, lng: number, name: string) => {
-        setSearchResults({ lat, lng, name });
+    const selectLocation = useCallback((lat: number, lng: number, name: string, capacity?: number, occupied?: number) => {
+        // Fallback for dynamic locations
+        const finalCapacity = capacity || Math.floor(Math.random() * 200) + 50;
+        const finalOccupied = occupied || Math.floor(Math.random() * finalCapacity * 0.9);
+
+        setSearchResults({ lat, lng, name, capacity: finalCapacity, occupied: finalOccupied });
         setSearchQuery(name);
         setShowSuggestions(false);
 
@@ -134,7 +138,7 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         );
 
         if (mockSpot) {
-            selectLocation(mockSpot.lat, mockSpot.lng, mockSpot.name);
+            selectLocation(mockSpot.lat, mockSpot.lng, mockSpot.name, mockSpot.capacity, mockSpot.occupied);
             return;
         }
 
@@ -334,7 +338,7 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                         position={[spot.lat, spot.lng]}
                         icon={createCustomIcon('search')}
                         eventHandlers={{
-                            click: () => selectLocation(spot.lat, spot.lng, spot.name),
+                            click: () => selectLocation(spot.lat, spot.lng, spot.name, spot.capacity, spot.occupied),
                         }}
                     />
                 ))}
@@ -348,30 +352,77 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                 )}
             </MapContainer>
 
-            {/* Recenter & Navigate Buttons */}
-            <div className="absolute bottom-6 right-6 flex flex-col gap-3 z-[1000]">
-                {searchResults && (
-                    <Button
-                        className="h-12 px-6 rounded-2xl bg-white/95 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center gap-2 text-primary hover:bg-white active:scale-95 transition-all"
-                        onClick={() => {
-                            const url = `https://www.google.com/maps/dir/?api=1&destination=${searchResults.lat},${searchResults.lng}`;
-                            window.open(url, '_blank');
-                        }}
-                    >
-                        <Navigation className="w-4 h-4 fill-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Start Nav</span>
-                    </Button>
-                )}
+            {/* Selection Detail Card */}
+            {searchResults && (
+                <div className="absolute bottom-6 left-6 right-6 z-[1000] animate-in slide-in-from-bottom-8 fade-in duration-300">
+                    <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl border border-white/20">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight truncate mb-1">
+                                    {searchResults.name.split(',')[0]}
+                                </h3>
+                                <p className="text-[10px] text-slate-500 uppercase opacity-60 truncate">
+                                    {searchResults.name.split(',').slice(1).join(',').trim() || "Verified Smart Parking"}
+                                </p>
+                            </div>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setSearchResults(null)}
+                                className="w-8 h-8 rounded-full -mt-2 -mr-2 text-slate-400 hover:text-slate-600"
+                            >
+                                <X className="w-4 h-4" />
+                            </Button>
+                        </div>
 
-                {!hideRecenter && (
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-xl font-black text-primary">{searchResults.capacity - searchResults.occupied}</span>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase">Available</span>
+                                </div>
+                                <div className="mt-2 w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all duration-1000 ${(searchResults.occupied / searchResults.capacity) > 0.8 ? 'bg-red-500' : 'bg-primary'
+                                            }`}
+                                        style={{ width: `${(searchResults.occupied / searchResults.capacity) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-center">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Slots</p>
+                                <p className="text-lg font-black text-slate-800 tracking-tight">{searchResults.capacity}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <Button
+                                className="flex-1 h-14 rounded-2xl gradient-primary text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform active:scale-95"
+                                onClick={() => {
+                                    const url = `https://www.google.com/maps/dir/?api=1&destination=${searchResults.lat},${searchResults.lng}`;
+                                    window.open(url, '_blank');
+                                }}
+                            >
+                                <Navigation className="w-4 h-4 fill-white" />
+                                Start Navigation
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Recenter Button (Side) */}
+            {!hideRecenter && (
+                <div className={`absolute bottom-6 right-6 z-[1000] transition-all duration-300 ${searchResults ? 'translate-y-[-240px]' : ''}`}>
                     <Button
-                        className="w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95 self-end"
+                        className="w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95"
                         onClick={recenter}
                     >
                         <Navigation className="w-5 h-5 text-white" />
                     </Button>
-                )}
-            </div>
+                </div>
+            )}
 
             <style>
                 {`
