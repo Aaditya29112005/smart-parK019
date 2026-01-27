@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import Map, { Marker, NavigationControl } from "react-map-gl/mapbox";
+import Map, { Marker, NavigationControl, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Navigation, Search, X } from "lucide-react";
 import { useLocation } from "@/hooks/use-location";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { AnyLayer } from "mapbox-gl";
 
 // Placeholder token - User should provide their own for production
 const MAPBOX_TOKEN = "pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbTVoZG9rdm0wY2RsMmpxeHh4bm8zZzR4In0.1x3YF7_H-XQ9j7m5x-x6pA"; // Lovable default or user token
@@ -13,6 +14,7 @@ const LiveMap = () => {
     const { latitude: liveLat, longitude: liveLng, error, loading } = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string } | null>(null);
+    const [routeData, setRouteData] = useState<any>(null);
     const [viewport, setViewport] = useState({
         latitude: 19.0760, // Default to Mumbai
         longitude: 72.8777,
@@ -34,30 +36,44 @@ const LiveMap = () => {
         if (!searchQuery.trim()) return;
 
         try {
-            const response = await fetch(
+            // Geocoding
+            const geoResponse = await fetch(
                 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
                     searchQuery
                 )}.json?access_token=${MAPBOX_TOKEN}`
             );
-            const data = await response.json();
-            if (data.features && data.features.length > 0) {
-                const [lng, lat] = data.features[0].center;
-                const name = data.features[0].place_name;
-                setSearchResults({ lat, lng, name });
+            const geoData = await geoResponse.json();
+            if (geoData.features && geoData.features.length > 0) {
+                const [destLng, destLat] = geoData.features[0].center;
+                const name = geoData.features[0].place_name;
+                setSearchResults({ lat: destLat, lng: destLng, name });
+
+                // If we have live location, get directions
+                if (liveLat && liveLng) {
+                    const directionsResponse = await fetch(
+                        `https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${destLng},${destLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
+                    );
+                    const directionsData = await directionsResponse.json();
+                    if (directionsData.routes && directionsData.routes.length > 0) {
+                        setRouteData(directionsData.routes[0].geometry);
+                    }
+                }
+
                 setViewport({
-                    latitude: lat,
-                    longitude: lng,
-                    zoom: 15,
+                    latitude: destLat,
+                    longitude: destLng,
+                    zoom: 14,
                 });
             }
         } catch (err) {
-            console.error("Search failed:", err);
+            console.error("Search or routing failed:", err);
         }
     };
 
     const clearSearch = () => {
         setSearchQuery("");
         setSearchResults(null);
+        setRouteData(null);
         if (liveLat && liveLng) {
             setViewport({
                 latitude: liveLat,
@@ -126,7 +142,31 @@ const LiveMap = () => {
                 mapStyle="mapbox://styles/mapbox/navigation-night-v1"
                 mapboxAccessToken={MAPBOX_TOKEN}
                 style={{ width: "100%", height: "100%" }}
+                attributionControl={false}
             >
+                {/* Route Layer */}
+                {routeData && (
+                    <Source id="route" type="geojson" data={{
+                        type: 'Feature',
+                        properties: {},
+                        geometry: routeData
+                    }}>
+                        <Layer
+                            id="route-line"
+                            type="line"
+                            layout={{
+                                'line-join': 'round',
+                                'line-cap': 'round'
+                            }}
+                            paint={{
+                                'line-color': '#3b82f6', // primary blue
+                                'line-width': 5,
+                                'line-opacity': 0.8
+                            }}
+                        />
+                    </Source>
+                )}
+
                 {/* Live Position Marker */}
                 {liveLat && liveLng && (
                     <Marker latitude={liveLat} longitude={liveLng} anchor="bottom">
@@ -170,6 +210,16 @@ const LiveMap = () => {
                     <Navigation className="w-5 h-5 text-white" />
                 </Button>
             </Map>
+            <style>
+                {`
+                .mapboxgl-ctrl-logo {
+                    display: none !important;
+                }
+                .mapboxgl-ctrl-attrib {
+                    display: none !important;
+                }
+                `}
+            </style>
         </div>
     );
 };
