@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Scanner from "./pages/Scanner";
 import ConfirmParking from "./pages/ConfirmParking";
@@ -31,15 +31,36 @@ import HelpSupport from "./pages/account/HelpSupport";
 
 import BottomNav from "./components/parking/BottomNav";
 import AIChatbot from "./components/parking/AIChatbot";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
+  const [session, setSession] = useState<any>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const isAuthenticated = !!session || isDemo;
+  const isAuthPage = location.pathname === "/auth";
 
   // Pages that shouldn't show the role switcher
-  const hideRoleSwitcher = [
-    "/auth",
+  const hideRoleSwitcher = isAuthPage || !isAuthenticated || [
     "/scanner",
     "/confirm-parking",
     "/task-completed",
@@ -47,7 +68,7 @@ const AppContent = () => {
     "/add-vehicle"
   ].includes(location.pathname);
 
-  const showBottomNav = [
+  const showBottomNav = isAuthenticated && [
     "/",
     "/history",
     "/settings",
@@ -65,33 +86,37 @@ const AppContent = () => {
               <Route
                 path="*"
                 element={
-                  <ProtectedRoute>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/scanner" element={<Scanner />} />
-                      <Route path="/confirm-parking" element={<ConfirmParking />} />
-                      <Route path="/ticket" element={<Ticket />} />
-                      <Route path="/retrieval" element={<Retrieval />} />
-                      <Route path="/history" element={<History />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/manager" element={<ManagerDashboard />} />
-                      <Route path="/add-driver" element={<AddDriver />} />
-                      <Route path="/add-vehicle" element={<AddVehicle />} />
-                      <Route path="/driver" element={<DriverConsole />} />
-                      <Route path="/task-completed" element={<TaskCompleted />} />
-                      <Route path="/admin" element={<SuperAdmin />} />
-                      <Route path="/map" element={<MapExplorer />} />
+                  !isAuthenticated && location.pathname === "/" ? (
+                    <Navigate to="/auth" replace />
+                  ) : (
+                    <ProtectedRoute>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/scanner" element={<Scanner />} />
+                        <Route path="/confirm-parking" element={<ConfirmParking />} />
+                        <Route path="/ticket" element={<Ticket />} />
+                        <Route path="/retrieval" element={<Retrieval />} />
+                        <Route path="/history" element={<History />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/manager" element={<ManagerDashboard />} />
+                        <Route path="/add-driver" element={<AddDriver />} />
+                        <Route path="/add-vehicle" element={<AddVehicle />} />
+                        <Route path="/driver" element={<DriverConsole />} />
+                        <Route path="/task-completed" element={<TaskCompleted />} />
+                        <Route path="/admin" element={<SuperAdmin />} />
+                        <Route path="/map" element={<MapExplorer />} />
 
-                      {/* Account Routes */}
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/vehicles" element={<MyVehicles />} />
-                      <Route path="/notifications" element={<Notifications />} />
-                      <Route path="/privacy" element={<PrivacySecurity />} />
-                      <Route path="/help" element={<HelpSupport />} />
+                        {/* Account Routes */}
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/vehicles" element={<MyVehicles />} />
+                        <Route path="/notifications" element={<Notifications />} />
+                        <Route path="/privacy" element={<PrivacySecurity />} />
+                        <Route path="/help" element={<HelpSupport />} />
 
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </ProtectedRoute>
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </ProtectedRoute>
+                  )
                 }
               />
             </Routes>
