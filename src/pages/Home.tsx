@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, QrCode, Trophy, Car, MapPin, Search } from "lucide-react";
+import { ChevronRight, QrCode, Trophy, Car, MapPin, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ParkingCard from "@/components/parking/ParkingCard";
 import { StorageService, ParkingSession } from "@/lib/storage";
@@ -10,6 +10,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [recentSessions, setRecentSessions] = useState<ParkingSession[]>([]);
   const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     const sessions = StorageService.getSessions();
@@ -35,10 +36,34 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Real-time Location Map */}
-        <div className="h-[180px] w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-1 border border-white/20 overflow-hidden shadow-xl mb-2">
-          <LiveMap />
-        </div>
+        {/* Search Bar / Map Toggle */}
+        {!showMap ? (
+          <div
+            onClick={() => setShowMap(true)}
+            className="w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-4 border border-white/20 shadow-xl mb-4 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-all active:scale-[0.98] group"
+          >
+            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+              <Search className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-primary-foreground/50 text-[10px] font-black uppercase tracking-widest">Quick View</p>
+              <h3 className="text-primary-foreground text-sm font-black uppercase">Search parking near me</h3>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-primary-foreground/50">
+              <ChevronRight className="w-5 h-5" />
+            </div>
+          </div>
+        ) : (
+          <div className="relative h-[220px] w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-1 border border-white/20 overflow-hidden shadow-xl mb-4 animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowMap(false)}
+              className="absolute top-4 right-14 z-30 w-11 h-11 bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg flex items-center justify-center text-slate-400 hover:text-slate-600 active:scale-95 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <LiveMap />
+          </div>
+        )}
 
         {/* Floating Active Card */}
         {activeSession && (
