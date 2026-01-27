@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -50,9 +50,14 @@ const createCustomIcon = (type: 'live' | 'search') => {
 
 interface LiveMapProps {
     hideSearch?: boolean;
+    hideRecenter?: boolean;
 }
 
-const LiveMap = ({ hideSearch = false }: LiveMapProps) => {
+export interface LiveMapRef {
+    recenter: () => void;
+}
+
+const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hideRecenter = false }, ref) => {
     const { latitude: liveLat, longitude: liveLng, error, loading } = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string } | null>(null);
@@ -61,6 +66,19 @@ const LiveMap = ({ hideSearch = false }: LiveMapProps) => {
         center: [19.0760, 72.8777] as [number, number], // Default Mumbai
         zoom: 15
     });
+
+    const recenter = useCallback(() => {
+        if (liveLat && liveLng) {
+            setView({
+                center: [liveLat, liveLng],
+                zoom: 16
+            });
+        }
+    }, [liveLat, liveLng]);
+
+    useImperativeHandle(ref, () => ({
+        recenter
+    }));
 
     useEffect(() => {
         if (liveLat && liveLng && !searchResults) {
@@ -216,19 +234,14 @@ const LiveMap = ({ hideSearch = false }: LiveMapProps) => {
             </MapContainer>
 
             {/* Recenter Button */}
-            <Button
-                className="absolute bottom-6 right-6 w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95 z-[1000]"
-                onClick={() => {
-                    if (liveLat && liveLng) {
-                        setView({
-                            center: [liveLat, liveLng],
-                            zoom: 16
-                        });
-                    }
-                }}
-            >
-                <Navigation className="w-5 h-5 text-white" />
-            </Button>
+            {!hideRecenter && (
+                <Button
+                    className="absolute bottom-6 right-6 w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95 z-[1000]"
+                    onClick={recenter}
+                >
+                    <Navigation className="w-5 h-5 text-white" />
+                </Button>
+            )}
 
             <style>
                 {`
@@ -243,6 +256,6 @@ const LiveMap = ({ hideSearch = false }: LiveMapProps) => {
             </style>
         </div>
     );
-};
+});
 
 export default LiveMap;
