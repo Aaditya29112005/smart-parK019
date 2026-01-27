@@ -26,7 +26,6 @@ const Settings = () => {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem("pixel-park-demo-session");
       await supabase.auth.signOut();
       toast.success("Logged out successfully");
       navigate("/auth");
