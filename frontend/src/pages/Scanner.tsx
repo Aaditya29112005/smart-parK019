@@ -25,7 +25,10 @@ const Scanner = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
-    setVehicles(StorageService.getVehicles());
+    const loadData = async () => {
+      setVehicles(await StorageService.getVehicles());
+    };
+    loadData();
 
     // Simulate multi-location detection
     const timer = setTimeout(() => {

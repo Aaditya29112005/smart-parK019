@@ -12,11 +12,11 @@ const Home = () => {
   const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
   const [analytics, setAnalytics] = useState({ totalRevenue: 0, totalHours: 0, activeCount: 0, historyCount: 0 });
 
-  const refreshData = () => {
-    const sessions = StorageService.getSessions();
+  const refreshData = async () => {
+    const sessions = await StorageService.getSessions();
     setRecentSessions(sessions.slice(0, 5));
-    setActiveSession(StorageService.getActiveSession());
-    setAnalytics(StorageService.getAnalytics());
+    setActiveSession(await StorageService.getActiveSession());
+    setAnalytics(await StorageService.getAnalytics());
   };
 
   useEffect(() => {
