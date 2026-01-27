@@ -149,7 +149,15 @@ const LiveMap = () => {
                 style={{ width: "100%", height: "100%" }}
                 attributionControl={false}
                 terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+                maxPitch={85}
             >
+                {/* Terrain Source for 3D Elevation */}
+                <Source
+                    id="mapbox-dem"
+                    type="raster-dem"
+                    url="mapbox://mapbox.mapbox-terrain-dem-v1"
+                    tileSize={512}
+                />
                 {/* Route Layer */}
                 {routeData && (
                     <Source id="route" type="geojson" data={{
