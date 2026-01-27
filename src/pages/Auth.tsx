@@ -17,23 +17,26 @@ export default function Auth() {
         e.preventDefault();
         setLoading(true);
 
-        // Demo Bypass
-        if (!isSignUp && email === "demo@pixelpark.com" && password === "password123") {
-            localStorage.setItem("pixel-park-demo-session", "true");
-            toast.success("Welcome (Demo Mode)!");
-            navigate("/");
-            setLoading(false);
-            return;
-        }
-
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({ email, password });
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: email.split('@')[0],
+                        }
+                    }
+                });
                 if (error) throw error;
-                toast.success("Check your email for confirmation!");
+                toast.success("Account created! Check your email for verification.");
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+
+                // Clear any old demo session
+                localStorage.removeItem("pixel-park-demo-session");
+
                 toast.success("Welcome back!");
                 navigate("/");
             }
