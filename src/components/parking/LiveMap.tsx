@@ -10,7 +10,11 @@ import type { AnyLayer } from "mapbox-gl";
 // Placeholder token - User should provide their own for production
 const MAPBOX_TOKEN = "pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbTVoZG9rdm0wY2RsMmpxeHh4bm8zZzR4In0.1x3YF7_H-XQ9j7m5x-x6pA"; // Lovable default or user token
 
-const LiveMap = () => {
+interface LiveMapProps {
+    hideSearch?: boolean;
+}
+
+const LiveMap = ({ hideSearch = false }: LiveMapProps) => {
     const { latitude: liveLat, longitude: liveLng, error, loading } = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string } | null>(null);
@@ -117,46 +121,71 @@ const LiveMap = () => {
     return (
         <div className="w-full h-full relative rounded-[2.5rem] overflow-hidden border border-border/50 shadow-card">
             {/* Search Overlay */}
-            <div className="absolute top-4 left-4 right-14 z-20">
-                <form onSubmit={handleSearch} className="relative group">
-                    <div className="absolute inset-x-0 -bottom-2 bg-black/10 blur-lg h-8 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                    <div className="relative flex items-center bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20">
-                        <Search className="w-4 h-4 ml-4 text-slate-400" />
-                        <Input
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search parking near..."
-                            className="bg-transparent border-none focus-visible:ring-0 text-sm h-11 placeholder:text-slate-400 placeholder:font-medium"
-                        />
-                        {searchQuery && (
-                            <button
-                                type="button"
-                                onClick={clearSearch}
-                                className="p-2 mr-1 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </div>
+            {!hideSearch && (
+                <div className="absolute top-4 left-4 right-14 z-20">
+                    <form onSubmit={handleSearch} className="relative group">
+                        <div className="absolute inset-x-0 -bottom-2 bg-black/10 blur-lg h-8 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                        <div className="relative flex items-center bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20">
+                            <Search className="w-4 h-4 ml-4 text-slate-400" />
+                            <Input
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search parking near..."
+                                className="bg-transparent border-none focus-visible:ring-0 text-sm h-11 placeholder:text-slate-400 placeholder:font-medium"
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    className="p-2 mr-1 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </div>
+            )}
 
             <Map
                 {...viewport}
                 onMove={(evt) => setViewport(evt.viewState)}
-                mapStyle="mapbox://styles/mapbox/standard"
+                mapStyle="mapbox://styles/mapbox/dark-v11"
                 mapboxAccessToken={MAPBOX_TOKEN}
                 style={{ width: "100%", height: "100%" }}
                 attributionControl={false}
-                terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
                 maxPitch={85}
             >
-                {/* Terrain Source for 3D Elevation */}
-                <Source
-                    id="mapbox-dem"
-                    type="raster-dem"
-                    url="mapbox://mapbox.mapbox-terrain-dem-v1"
-                    tileSize={512}
+                {/* 3D Buildings Layer */}
+                <Layer
+                    id="3d-buildings"
+                    source="composite"
+                    source-layer="building"
+                    filter={['==', 'extrude', 'true']}
+                    type="fill-extrusion"
+                    minzoom={15}
+                    paint={{
+                        'fill-extrusion-color': '#444',
+                        'fill-extrusion-height': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            15,
+                            0,
+                            15.05,
+                            ['get', 'height']
+                        ],
+                        'fill-extrusion-base': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            15,
+                            0,
+                            15.05,
+                            ['get', 'min_height']
+                        ],
+                        'fill-extrusion-opacity': 0.6
+                    }}
                 />
                 {/* Route Layer */}
                 {routeData && (
