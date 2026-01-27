@@ -18,7 +18,10 @@ const ManagerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    setSessions(StorageService.getSessions());
+    const loadSessions = async () => {
+      setSessions(await StorageService.getSessions());
+    };
+    loadSessions();
   }, []);
 
   const filteredSessions = sessions.filter(session => {

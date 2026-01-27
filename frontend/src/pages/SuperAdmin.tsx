@@ -21,12 +21,15 @@ const SuperAdmin = () => {
   });
 
   useEffect(() => {
-    const sessions = StorageService.getSessions();
-    setStats({
-      totalTickets: sessions.length,
-      totalRevenue: sessions.reduce((acc, s) => acc + s.amount, 0),
-      activeParking: sessions.filter(s => s.status === 'active').length,
-    });
+    const loadStats = async () => {
+      const sessions = await StorageService.getSessions();
+      setStats({
+        totalTickets: sessions.length,
+        totalRevenue: sessions.reduce((acc, s) => acc + s.amount, 0),
+        activeParking: sessions.filter(s => s.status === 'active').length,
+      });
+    };
+    loadStats();
   }, []);
 
   return (

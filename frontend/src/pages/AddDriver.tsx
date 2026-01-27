@@ -68,7 +68,7 @@ const AddDriver = () => {
       }
 
       // Real persistence to StorageService
-      StorageService.addDriver({
+      await StorageService.addDriver({
         fullName: formData.fullName,
         phone: formData.phone,
         licenseNumber: formData.licenseNumber,

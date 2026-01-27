@@ -15,10 +15,14 @@ const DriverConsole = () => {
   const [activeSession, setActiveSession] = useState<any>(null);
 
   useEffect(() => {
-    // Look for a session that needs retrieval (completed but recently)
-    // For demo purposes, we'll just pick the first completed one
-    const completed = StorageService.getSessions().find(s => s.status === 'completed');
-    setActiveSession(completed);
+    const loadAssignment = async () => {
+      // Look for a session that needs retrieval (completed but recently)
+      // For demo purposes, we'll just pick the first completed one
+      const sessions = await StorageService.getSessions();
+      const completed = sessions.find(s => s.status === 'completed');
+      setActiveSession(completed);
+    };
+    loadAssignment();
   }, []);
 
   useEffect(() => {

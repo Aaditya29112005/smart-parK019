@@ -12,10 +12,13 @@ const Retrieval = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    const s = location.state?.session || StorageService.getActiveSession();
-    if (s) {
-      setSession(s);
-    }
+    const loadSession = async () => {
+      const s = location.state?.session || await StorageService.getActiveSession();
+      if (s) {
+        setSession(s);
+      }
+    };
+    loadSession();
   }, [location.state]);
 
   // Simulate progress
