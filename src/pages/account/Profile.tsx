@@ -1,24 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, User, Mail, Phone, MapPin, Check } from "lucide-react";
+import { ArrowLeft, Camera, User, Mail, Phone, MapPin, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState({
-        name: "Aaditya Samadhiya",
-        email: "aaditya@example.com",
+        name: "",
+        email: "",
         phone: "+91 98765 43210",
         address: "Mumbai, Maharashtra, India"
     });
 
-    const handleSave = () => {
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setProfile(prev => ({
+                    ...prev,
+                    name: user.user_metadata?.full_name || user.email?.split('@')[0] || "User",
+                    email: user.email || "",
+                }));
+            }
+            setLoading(false);
+        };
+        fetchProfile();
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: { full_name: profile.name }
+            });
+            if (error) throw error;
+            setIsEditing(false);
+            toast.success("Profile updated in Supabase!");
+        } catch (error: any) {
+            toast.error(error.message);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="h-full bg-background flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="h-full bg-background flex flex-col">
