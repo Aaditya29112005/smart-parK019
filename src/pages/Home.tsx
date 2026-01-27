@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ParkingCard from "@/components/parking/ParkingCard";
 import { StorageService, ParkingSession } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
+import LiveMap from "@/components/parking/LiveMap";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -95,6 +96,14 @@ const Home = () => {
               <span className={`text-xs font-black uppercase tracking-wider ${item.active ? 'text-white' : ''}`}>{item.label}</span>
             </div>
           ))}
+        </div>
+
+        {/* Live Map Section */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Live Map</h2>
+        </div>
+        <div className="h-[250px] mb-10">
+          <LiveMap />
         </div>
 
         {/* History Section */}
