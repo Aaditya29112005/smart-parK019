@@ -59,9 +59,25 @@ export interface LiveMapRef {
 }
 
 const MOCK_PARKING_SPOTS = [
+    // Mumbai
     { id: "p1", lat: 18.9942, lng: 72.8258, name: "Phoenix Palladium Parking" },
     { id: "p2", lat: 19.0634, lng: 72.8596, name: "Jio World Drive Parking" },
     { id: "p3", lat: 19.1741, lng: 72.8601, name: "Oberoi Mall Parking" },
+    // Delhi/NCR
+    { id: "p6", lat: 28.5672, lng: 77.2100, name: "Select CITYWALK Parking" },
+    { id: "p7", lat: 28.4595, lng: 77.0266, name: "DLF CyberHub Parking" },
+    { id: "p8", lat: 28.5326, lng: 77.2100, name: "Saket District Centre" },
+    // Bangalore
+    { id: "p9", lat: 12.9716, lng: 77.5946, name: "UB City Parking" },
+    { id: "p10", lat: 12.9345, lng: 77.6111, name: "Forum South India Parking" },
+    { id: "p11", lat: 13.0113, lng: 77.5550, name: "Orion Mall Parking" },
+    // Hyderabad
+    { id: "p12", lat: 17.4348, lng: 78.3866, name: "Inorbit Mall Parking" },
+    { id: "p13", lat: 17.3850, lng: 78.4867, name: "Charminar Public Parking" },
+    // Kolkata
+    { id: "p14", lat: 22.5392, lng: 88.3519, name: "Quest Mall Parking" },
+    { id: "p15", lat: 22.5726, lng: 88.3639, name: "Park Street Parking" },
+    // General
     { id: "p4", lat: 18.9220, lng: 72.8347, name: "Gateway Public Parking" },
     { id: "p5", lat: 18.9430, lng: 72.8231, name: "Marine Drive Parking" },
 ];
@@ -72,8 +88,8 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
     const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string } | null>(null);
     const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
     const [view, setView] = useState({
-        center: [19.0760, 72.8777] as [number, number], // Default Mumbai
-        zoom: 13
+        center: [20.5937, 78.9629] as [number, number], // Center of India
+        zoom: 5
     });
 
     const recenter = useCallback(() => {
