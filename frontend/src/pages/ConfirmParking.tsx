@@ -25,7 +25,8 @@ const ConfirmParking = () => {
     id: 1,
     name: "Toyota Camry",
     plateNumber: "MH 12 AB 1234",
-    ownerName: "John Doe"
+    ownerName: "John Doe",
+    type: "car"
   };
   const locationName = location.state?.location || "Inorbit Mall";
 
@@ -41,10 +42,15 @@ const ConfirmParking = () => {
 
     // Simulate payment processing
     setTimeout(async () => {
-      const session = await StorageService.startSession(vehicle, locationName);
-      setIsProcessing(false);
-      toast.success("Payment Successful!");
-      navigate("/ticket", { state: { session, vehicle } });
+      try {
+        const session = await StorageService.startSession(vehicle, locationName);
+        setIsProcessing(false);
+        toast.success("Payment Successful!");
+        navigate("/ticket", { state: { session, vehicle } });
+      } catch (error) {
+        setIsProcessing(false);
+        toast.error("Payment failed. Please try again.");
+      }
     }, 2000);
   };
 

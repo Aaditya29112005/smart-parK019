@@ -147,6 +147,9 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
             const geoResponse = await fetch(
                 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`
             );
+
+            if (!geoResponse.ok) throw new Error('Geocoding failed');
+
             const geoData = await geoResponse.json();
 
             if (geoData.features && geoData.features.length > 0) {
