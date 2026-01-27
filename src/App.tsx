@@ -22,6 +22,7 @@ import Auth from "./pages/Auth";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 import BottomNav from "./components/parking/BottomNav";
+import AIChatbot from "./components/parking/AIChatbot";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,8 @@ const AppContent = () => {
               />
             </Routes>
           </div>
+
+          <AIChatbot />
 
           {/* Native Bottom Navigation - inside phone-screen */}
           {showBottomNav && (
