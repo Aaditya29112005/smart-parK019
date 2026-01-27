@@ -58,6 +58,12 @@ const MapExplorer = () => {
         window.speechSynthesis.speak(utterance);
     };
 
+    const MAGIC_LOCATIONS = [
+        "Phoenix Palladium", "Jio World", "Oberoi Mall", "Select Citywalk",
+        "DLF Cyberhub", "UB City", "Inorbit Mall", "Quest Mall",
+        "Gateway of India", "Marine Drive", "Saket District", "Orion Mall", "Park Street"
+    ];
+
     const processVoiceCommand = useCallback((command: string) => {
         const cleanCommand = command.toLowerCase().trim();
 
@@ -65,15 +71,33 @@ const MapExplorer = () => {
             mapRef.current?.recenter();
             speak("Recentering map to your location.");
             toast.success("Recentered");
+            return;
+        }
+
+        // Check for specific location names
+        const matchedLocation = MAGIC_LOCATIONS.find(loc => cleanCommand.includes(loc.toLowerCase()));
+
+        if (matchedLocation) {
+            speak(`Taking you directly to ${matchedLocation}`);
+            toast.success(`Jumping to ${matchedLocation}`);
+            mapRef.current?.search(matchedLocation);
         } else {
-            // Assume it's a location search
-            const locationQuery = cleanCommand.replace("find", "").replace("search", "").replace("parking in", "").replace("parking near", "").trim();
+            // Assume it's a general location search
+            const locationQuery = cleanCommand
+                .replace("find", "")
+                .replace("search", "")
+                .replace("parking in", "")
+                .replace("parking near", "")
+                .replace("go to", "")
+                .replace("take me to", "")
+                .trim();
+
             if (locationQuery) {
                 speak(`Searching for parking near ${locationQuery}`);
                 mapRef.current?.search(locationQuery);
             }
         }
-    }, []);
+    }, [MAGIC_LOCATIONS]);
 
     const toggleListening = () => {
         if (isListening) {
@@ -129,8 +153,17 @@ const MapExplorer = () => {
                         <div className="space-y-2">
                             <h2 className="text-primary font-black uppercase tracking-[0.2em] text-sm">How can I help?</h2>
                             <p className="text-slate-600 font-bold min-h-[1.5em] italic">
-                                {transcript || "Try saying 'Find parking in Mumbai'..."}
+                                {transcript || "Try saying 'Go to Phoenix Palladium'..."}
                             </p>
+                            {!transcript && (
+                                <div className="flex flex-wrap justify-center gap-2 mt-2 opacity-60">
+                                    {["UB City", "Jio World", "Orion Mall"].map(name => (
+                                        <span key={name} className="text-[10px] bg-slate-100 px-3 py-1 rounded-full text-slate-500 font-black uppercase tracking-tighter">
+                                            "{name}"
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-2">
