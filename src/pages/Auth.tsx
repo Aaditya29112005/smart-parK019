@@ -44,6 +44,20 @@ export default function Auth() {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            toast.error(error.message);
+        }
+    };
+
     return (
         <div className="flex-1 bg-slate-900 flex flex-col items-center justify-center p-6 pt-safe pb-safe overflow-y-auto">
             <div className="w-full max-w-md bg-card rounded-[2.5rem] p-8 shadow-2xl border border-border/50 animate-in fade-in zoom-in duration-500 my-auto">
@@ -107,7 +121,7 @@ export default function Auth() {
                 <div className="mt-6 grid grid-cols-1 gap-3">
                     <button
                         type="button"
-                        onClick={() => toast.info("Google Login is coming soon!")}
+                        onClick={handleGoogleLogin}
                         className="w-full h-12 rounded-2xl border border-border bg-white flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
