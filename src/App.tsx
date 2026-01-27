@@ -42,10 +42,16 @@ const AppContent = () => {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    const fetchSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (e) {
+        console.warn("Supabase connection failed - staying in offline/demo mode");
+      }
+    };
 
+    fetchSession();
     setIsDemo(localStorage.getItem("pixel-park-demo-session") === "true");
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
