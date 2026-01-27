@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 import type {
     Vehicle,
     Driver,
@@ -31,7 +31,9 @@ const notify = () => {
 };
 
 // Check if user is in demo mode
+// Force demo mode if Supabase is not properly configured
 const isDemo = () => {
+    if (!isSupabaseConfigured) return true;
     return localStorage.getItem("pixel-park-demo-session") === "true";
 };
 
