@@ -109,6 +109,18 @@ const Settings = () => {
           </button>
 
           <button
+            onClick={() => {
+              localStorage.clear();
+              toast.success("Registry Purged. Restoring seed data...");
+              setTimeout(() => window.location.reload(), 1500);
+            }}
+            className="w-full bg-slate-50 rounded-[2rem] p-5 border border-slate-200 flex items-center justify-center gap-3 hover:bg-slate-100 transition-all group"
+          >
+            <Shield className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-all" />
+            <span className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-600">Clear Secure Registry</span>
+          </button>
+
+          <button
             onClick={handleLogout}
             className="w-full bg-red-50 rounded-[2rem] p-5 border border-red-100 flex items-center justify-center gap-3 hover:bg-red-100 transition-all group"
           >

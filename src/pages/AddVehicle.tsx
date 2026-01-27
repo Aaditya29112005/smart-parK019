@@ -39,10 +39,7 @@ const AddVehicle = () => {
 
         setLoading(true);
         try {
-            // Simulate processing
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            const newVehicle = StorageService.addVehicle({
+            StorageService.addVehicle({
                 name: model,
                 plateNumber: plate,
                 type: type,
@@ -51,7 +48,7 @@ const AddVehicle = () => {
             });
 
             toast.success("Vehicle synced to secure network!");
-            navigate("/scanner", { state: { newVehicle } });
+            navigate("/scanner");
         } catch (error) {
             toast.error("Sync failed. Check connection.");
         } finally {

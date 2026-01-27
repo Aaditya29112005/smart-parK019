@@ -1,26 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Car, Search, Plus, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { StorageService, Vehicle } from "@/lib/storage";
 
 const MyVehicles = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
-    const [vehicles, setVehicles] = useState([
-        { id: 1, model: "Tesla Model 3", plate: "MH 01 AB 1234", color: "Pearl White" },
-        { id: 2, model: "Range Rover Sport", plate: "MH 04 XY 5678", color: "Santorini Black" },
-    ]);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+
+    const loadVehicles = () => {
+        setVehicles(StorageService.getVehicles());
+    };
+
+    useEffect(() => {
+        loadVehicles();
+        window.addEventListener('smart_park_data_updated', loadVehicles);
+        return () => window.removeEventListener('smart_park_data_updated', loadVehicles);
+    }, []);
 
     const filteredVehicles = vehicles.filter(v =>
-        v.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.plate.toLowerCase().includes(searchQuery.toLowerCase())
+        v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.plateNumber.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const deleteVehicle = (id: number) => {
-        setVehicles(vehicles.filter(v => v.id !== id));
-        toast.success("Vehicle removed");
+        StorageService.deleteVehicle(id);
+        toast.success("Vehicle removed from registry");
     };
 
     return (
@@ -40,7 +48,7 @@ const MyVehicles = () => {
                 <div className="relative group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
                     <Input
-                        placeholder="Search your cars..."
+                        placeholder="Search your units..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-11 h-12 bg-card border-none shadow-sm rounded-2xl focus-visible:ring-primary/20"
@@ -49,7 +57,7 @@ const MyVehicles = () => {
             </div>
 
             {/* Vehicles List */}
-            <div className="flex-1 px-6 space-y-4 overflow-y-auto pb-24">
+            <div className="flex-1 px-6 space-y-4 overflow-y-auto pb-24 scrollbar-hide">
                 {filteredVehicles.map((vehicle) => (
                     <div key={vehicle.id} className="bg-card p-5 rounded-[2rem] border border-border/50 shadow-sm hover:shadow-md transition-all group">
                         <div className="flex items-start justify-between">
@@ -58,8 +66,8 @@ const MyVehicles = () => {
                                     <Car className="w-7 h-7" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800">{vehicle.model}</h3>
-                                    <p className="text-[10px] font-black uppercase text-primary tracking-widest mt-0.5">{vehicle.plate}</p>
+                                    <h3 className="font-bold text-slate-800">{vehicle.name}</h3>
+                                    <p className="text-[10px] font-black uppercase text-primary tracking-widest mt-0.5">{vehicle.plateNumber}</p>
                                 </div>
                             </div>
                             <button
@@ -70,21 +78,22 @@ const MyVehicles = () => {
                             </button>
                         </div>
                         <div className="mt-4 pt-4 border-t border-dashed border-border flex items-center justify-between">
-                            <span className="text-xs font-medium text-slate-400 uppercase tracking-tighter">Color</span>
-                            <span className="text-xs font-bold text-slate-600">{vehicle.color}</span>
+                            <span className="text-xs font-medium text-slate-400 uppercase tracking-tighter">Owner</span>
+                            <span className="text-xs font-bold text-slate-600">{vehicle.ownerName || "Primary User"}</span>
                         </div>
                     </div>
                 ))}
 
                 {filteredVehicles.length === 0 && (
-                    <div className="py-10 text-center">
-                        <p className="text-slate-400 font-medium italic">No vehicles found matching "{searchQuery}"</p>
+                    <div className="py-20 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                        <Car className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No units found</p>
                     </div>
                 )}
             </div>
 
             {/* Add Vehicle FAB */}
-            <div className="absolute bottom-8 right-6">
+            <div className="fixed bottom-10 right-6 z-20">
                 <Button
                     onClick={() => navigate("/add-vehicle")}
                     className="w-14 h-14 rounded-2xl gradient-primary shadow-xl shadow-primary/30 flex items-center justify-center p-0 group"

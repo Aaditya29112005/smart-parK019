@@ -10,11 +10,19 @@ const Home = () => {
   const navigate = useNavigate();
   const [recentSessions, setRecentSessions] = useState<ParkingSession[]>([]);
   const [activeSession, setActiveSession] = useState<ParkingSession | null>(null);
+  const [analytics, setAnalytics] = useState({ totalRevenue: 0, totalHours: 0, activeCount: 0, historyCount: 0 });
 
-  useEffect(() => {
+  const refreshData = () => {
     const sessions = StorageService.getSessions();
     setRecentSessions(sessions.slice(0, 5));
     setActiveSession(StorageService.getActiveSession());
+    setAnalytics(StorageService.getAnalytics());
+  };
+
+  useEffect(() => {
+    refreshData();
+    window.addEventListener('smart_park_data_updated', refreshData);
+    return () => window.removeEventListener('smart_park_data_updated', refreshData);
   }, []);
 
   const handleParkingClick = (session: ParkingSession) => {
@@ -101,6 +109,22 @@ const Home = () => {
       </div>
 
       <div className="px-6 mt-16 pb-2">
+        {/* Quick Actions / Intelligence Dashboard */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Revenue</span>
+            <p className="text-sm font-black text-primary">₹{analytics.totalRevenue}</p>
+          </div>
+          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Active</span>
+            <p className="text-sm font-black text-primary">{analytics.activeCount} Unit</p>
+          </div>
+          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Sessions</span>
+            <p className="text-sm font-black text-primary">{analytics.historyCount}+</p>
+          </div>
+        </div>
+
         {/* Quick Actions / Featured Sites */}
         <div className="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
           {[
@@ -127,7 +151,7 @@ const Home = () => {
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 mb-10">
           {recentSessions.map((session) => (
             <ParkingCard
               key={session.id}
@@ -135,7 +159,7 @@ const Home = () => {
               address={session.address}
               date={new Date(session.entryTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
               vehicleNumber={session.plateNumber}
-              duration={session.duration || "Active"}
+              duration={session.duration}
               amount={session.amount}
               status={session.status === 'active' ? 'in-progress' : 'completed'}
               onClick={() => handleParkingClick(session)}
@@ -147,6 +171,43 @@ const Home = () => {
               <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-[0.2em]">No history found</p>
             </div>
           )}
+        </div>
+
+        {/* Operational Activity Feed */}
+        <div className="mt-12 mb-20 px-1">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1.5 h-4 bg-primary rounded-full" />
+            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Live Intelligence</h2>
+          </div>
+
+          <div className="space-y-6 relative">
+            <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100" />
+
+            {/* Real Session Feed Item */}
+            {recentSessions.length > 0 && (
+              <div className="relative pl-10 flex flex-col gap-1">
+                <div className="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-4 border-white bg-primary shadow-sm" />
+                <span className="text-[10px] font-black uppercase text-primary tracking-widest">{recentSessions[0].status === 'active' ? 'Deployment Active' : 'Operation Closed'}</span>
+                <p className="text-sm font-bold text-slate-800 uppercase">{recentSessions[0].vehicleName} at {recentSessions[0].location}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase opacity-60">Handled by Unit Valet-01</p>
+              </div>
+            )}
+
+            {/* Mock Background Events */}
+            <div className="relative pl-10 flex flex-col gap-1">
+              <div className="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-4 border-white bg-green-400 shadow-sm" />
+              <span className="text-[10px] font-black uppercase text-green-500 tracking-widest">Driver Approved</span>
+              <p className="text-sm font-bold text-slate-800 uppercase">Rajesh Kumar verified</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase opacity-60">Status: Protocol-Alpha</p>
+            </div>
+
+            <div className="relative pl-10 flex flex-col gap-1">
+              <div className="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-4 border-white bg-amber-400 shadow-sm" />
+              <span className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Zone Alert</span>
+              <p className="text-sm font-bold text-slate-800 uppercase">Jio World Drive reaching 95%</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase opacity-60">Redirect protocol standby</p>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageService } from "@/lib/storage";
 
 const AddDriver = () => {
   const navigate = useNavigate();
@@ -58,7 +59,6 @@ const AddDriver = () => {
 
     setLoading(true);
     try {
-      // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
       const demoSession = localStorage.getItem("pixel-park-demo-session");
 
@@ -67,14 +67,18 @@ const AddDriver = () => {
         return;
       }
 
-      // In real app, we would upload files to Supabase Storage here
-      // For this implementation, we'll simulate the save success
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Real persistence to StorageService
+      StorageService.addDriver({
+        fullName: formData.fullName,
+        phone: formData.phone,
+        licenseNumber: formData.licenseNumber,
+        avatarUrl: driverPhotoPreview || undefined
+      });
 
-      toast.success("Driver details submitted for review!");
+      toast.success("Identity synchronized to secure ledger!");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.message || "Failed to submit details");
+      toast.error(error.message || "Transmission failed. Retry protocol."); // Updated error message
     } finally {
       setLoading(false);
     }
