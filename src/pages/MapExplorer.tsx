@@ -9,8 +9,8 @@ const MapExplorer = () => {
     return (
         <div className="h-full w-full bg-background flex flex-col relative overflow-hidden">
             {/* Full Screen Map Container */}
-            <div className="absolute inset-0 z-0">
-                <LiveMap />
+            <div className="absolute inset-0 z-0 text-white">
+                <LiveMap hideSearch={true} />
             </div>
 
             {/* Top Bar - Header Area */}
@@ -25,7 +25,7 @@ const MapExplorer = () => {
 
                     <div className="flex-1 bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl px-4 py-3 flex items-center gap-3 pointer-events-auto">
                         <Search className="w-5 h-5 text-slate-400" />
-                        <span className="text-sm font-medium text-slate-500 uppercase tracking-tight">Explore Parking...</span>
+                        <span className="text-sm font-medium text-slate-500 uppercase tracking-tight">Search parking near...</span>
                     </div>
                 </div>
             </div>
