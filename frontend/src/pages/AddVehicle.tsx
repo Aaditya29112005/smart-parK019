@@ -39,7 +39,7 @@ const AddVehicle = () => {
 
         setLoading(true);
         try {
-            StorageService.addVehicle({
+            await StorageService.addVehicle({
                 name: model,
                 plateNumber: plate,
                 type: type,

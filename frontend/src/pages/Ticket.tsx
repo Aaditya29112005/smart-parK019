@@ -11,19 +11,22 @@ const Ticket = () => {
   const [session, setSession] = useState<ParkingSession | null>(null);
 
   useEffect(() => {
-    // Priority: 1. State from navigation, 2. Get active session from storage
-    const stateSession = location.state?.session;
-    if (stateSession) {
-      setSession(stateSession);
-    } else {
-      const active = StorageService.getActiveSession();
-      setSession(active);
-    }
+    const loadSession = async () => {
+      // Priority: 1. State from navigation, 2. Get active session from storage
+      const stateSession = location.state?.session;
+      if (stateSession) {
+        setSession(stateSession);
+      } else {
+        const active = await StorageService.getActiveSession();
+        setSession(active);
+      }
+    };
+    loadSession();
   }, [location.state]);
 
-  const handleEndParking = () => {
+  const handleEndParking = async () => {
     if (session) {
-      StorageService.completeSession(session.id);
+      await StorageService.completeSession(session.id);
       navigate("/retrieval", { state: { session } });
     }
   };

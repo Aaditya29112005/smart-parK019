@@ -8,8 +8,11 @@ const History = () => {
   const [history, setHistory] = useState<ParkingSession[]>([]);
 
   useEffect(() => {
-    const sessions = StorageService.getSessions();
-    setHistory(sessions);
+    const loadHistory = async () => {
+      const sessions = await StorageService.getSessions();
+      setHistory(sessions);
+    };
+    loadHistory();
   }, []);
 
   const handleParkingClick = (session: ParkingSession) => {

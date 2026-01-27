@@ -11,8 +11,8 @@ const MyVehicles = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
-    const loadVehicles = () => {
-        setVehicles(StorageService.getVehicles());
+    const loadVehicles = async () => {
+        setVehicles(await StorageService.getVehicles());
     };
 
     useEffect(() => {
@@ -26,8 +26,8 @@ const MyVehicles = () => {
         v.plateNumber.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const deleteVehicle = (id: number) => {
-        StorageService.deleteVehicle(id);
+    const deleteVehicle = async (id: number) => {
+        await StorageService.deleteVehicle(id);
         toast.success("Vehicle removed from registry");
     };
 

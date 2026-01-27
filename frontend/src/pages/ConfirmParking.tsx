@@ -36,12 +36,12 @@ const ConfirmParking = () => {
     total: 150
   };
 
-  const handleConfirmPay = () => {
+  const handleConfirmPay = async () => {
     setIsProcessing(true);
 
     // Simulate payment processing
-    setTimeout(() => {
-      const session = StorageService.startSession(vehicle, locationName);
+    setTimeout(async () => {
+      const session = await StorageService.startSession(vehicle, locationName);
       setIsProcessing(false);
       toast.success("Payment Successful!");
       navigate("/ticket", { state: { session, vehicle } });
