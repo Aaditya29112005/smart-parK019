@@ -147,18 +147,34 @@ export default function Auth() {
                         </div>
                     )}
 
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full h-15 gradient-primary text-primary-foreground font-black uppercase text-sm tracking-widest rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                    >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                            <>
-                                <span>{authMode === 'signup' ? "Register Link" : authMode === 'login' ? "Access Link" : "Send Link"}</span>
-                                <ArrowLeft className="w-4 h-4 rotate-180" />
-                            </>
+                    <div className="space-y-4 pt-2">
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full h-15 gradient-primary text-primary-foreground font-black uppercase text-sm tracking-widest rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                                <>
+                                    <span>{authMode === 'signup' ? "Register Link" : authMode === 'login' ? "Access Link" : "Send Link"}</span>
+                                    <ArrowLeft className="w-4 h-4 rotate-180" />
+                                </>
+                            )}
+                        </Button>
+
+                        {authMode === 'login' && (
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    localStorage.setItem("pixel-park-demo-session", "true");
+                                    toast.success("Entering Demo Mode...");
+                                    navigate("/");
+                                }}
+                                className="w-full h-15 bg-white border-2 border-primary/20 text-primary font-black uppercase text-sm tracking-widest rounded-2xl hover:bg-slate-50 active:scale-[0.98] transition-all"
+                            >
+                                Demo Access
+                            </Button>
                         )}
-                    </Button>
+                    </div>
                 </form>
 
                 <div className="mt-8 text-center">
