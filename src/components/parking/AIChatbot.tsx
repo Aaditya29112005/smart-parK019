@@ -71,9 +71,9 @@ const AIChatbot = () => {
     };
 
     return (
-        <div className="fixed bottom-24 right-4 z-[60] flex flex-col items-end pointer-events-none">
+        <div className="absolute bottom-20 right-4 z-[60] flex flex-col items-end pointer-events-none">
             {isOpen && (
-                <div className="w-[320px] h-[450px] bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 mb-4 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300 pointer-events-auto">
+                <div className="w-[280px] h-[400px] bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 mb-4 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300 pointer-events-auto">
                     {/* Header */}
                     <div className="gradient-primary p-4 flex items-center justify-between text-white">
                         <div className="flex items-center gap-2">
@@ -108,8 +108,8 @@ const AIChatbot = () => {
                                 >
                                     <div
                                         className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.sender === "user"
-                                                ? "bg-primary text-white rounded-tr-none"
-                                                : "bg-slate-100 text-slate-800 rounded-tl-none"
+                                            ? "bg-primary text-white rounded-tr-none"
+                                            : "bg-slate-100 text-slate-800 rounded-tl-none"
                                             }`}
                                     >
                                         {msg.text}
