@@ -18,16 +18,19 @@ const LiveMap = () => {
     const [viewport, setViewport] = useState({
         latitude: 19.0760, // Default to Mumbai
         longitude: 72.8777,
-        zoom: 14,
+        zoom: 15,
+        pitch: 60, // 3D Tilt
+        bearing: 0,
     });
 
     useEffect(() => {
         if (liveLat && liveLng && !searchResults) {
-            setViewport({
+            setViewport(prev => ({
+                ...prev,
                 latitude: liveLat,
                 longitude: liveLng,
-                zoom: 15,
-            });
+                zoom: 16,
+            }));
         }
     }, [liveLat, liveLng, searchResults]);
 
@@ -59,11 +62,12 @@ const LiveMap = () => {
                     }
                 }
 
-                setViewport({
+                setViewport(prev => ({
+                    ...prev,
                     latitude: destLat,
                     longitude: destLng,
-                    zoom: 14,
-                });
+                    zoom: 16,
+                }));
             }
         } catch (err) {
             console.error("Search or routing failed:", err);
@@ -75,11 +79,12 @@ const LiveMap = () => {
         setSearchResults(null);
         setRouteData(null);
         if (liveLat && liveLng) {
-            setViewport({
+            setViewport(prev => ({
+                ...prev,
                 latitude: liveLat,
                 longitude: liveLng,
-                zoom: 15,
-            });
+                zoom: 16,
+            }));
         }
     };
 
@@ -139,10 +144,11 @@ const LiveMap = () => {
             <Map
                 {...viewport}
                 onMove={(evt) => setViewport(evt.viewState)}
-                mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+                mapStyle="mapbox://styles/mapbox/standard"
                 mapboxAccessToken={MAPBOX_TOKEN}
                 style={{ width: "100%", height: "100%" }}
                 attributionControl={false}
+                terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
             >
                 {/* Route Layer */}
                 {routeData && (
@@ -199,11 +205,12 @@ const LiveMap = () => {
                     className="absolute bottom-6 right-6 w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95"
                     onClick={() => {
                         if (liveLat && liveLng) {
-                            setViewport({
+                            setViewport(prev => ({
+                                ...prev,
                                 latitude: liveLat,
                                 longitude: liveLng,
-                                zoom: 15,
-                            });
+                                zoom: 16,
+                            }));
                         }
                     }}
                 >
