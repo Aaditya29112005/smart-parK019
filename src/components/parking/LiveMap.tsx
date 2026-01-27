@@ -118,22 +118,73 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         search: executeSearch
     }));
 
+    const [suggestions, setSuggestions] = useState<{ id: string; place_name: string; center: [number, number] }[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Fetch suggestions as user types
     useEffect(() => {
-        if (liveLat && liveLng && !searchResults) {
-            setView({
-                center: [liveLat, liveLng],
-                zoom: 16
-            });
-        }
-    }, [liveLat, liveLng, searchResults]);
+        const fetchSuggestions = async () => {
+            if (searchQuery.length < 3) {
+                setSuggestions([]);
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5`
+                );
+                const data = await response.json();
+                if (data.features) {
+                    setSuggestions(data.features.map((f: any) => ({
+                        id: f.id,
+                        place_name: f.place_name,
+                        center: f.center
+                    })));
+                }
+            } catch (err) {
+                console.error("Failed to fetch suggestions:", err);
+            }
+        };
+
+        const timer = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
+        setShowSuggestions(false);
         executeSearch(searchQuery);
+    };
+
+    const selectSuggestion = (suggestion: { place_name: string; center: [number, number] }) => {
+        setSearchQuery(suggestion.place_name);
+        setSuggestions([]);
+        setShowSuggestions(false);
+
+        // Use the center from suggestion directly to avoid another geocode call
+        const [destLng, destLat] = suggestion.center;
+        setSearchResults({ lat: destLat, lng: destLng, name: suggestion.place_name });
+
+        if (liveLat && liveLng) {
+            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${destLng},${destLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`)
+                .then(res => res.json())
+                .then(directionsData => {
+                    if (directionsData.routes && directionsData.routes.length > 0) {
+                        const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+                        setRouteCoords(coords);
+                    }
+                });
+        }
+
+        setView({
+            center: [destLat, destLng],
+            zoom: 16
+        });
     };
 
     const clearSearch = () => {
         setSearchQuery("");
+        setSuggestions([]);
         setSearchResults(null);
         setRouteCoords(null);
         if (liveLat && liveLng) {
@@ -175,13 +226,17 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
             {/* Search Overlay */}
             {!hideSearch && (
                 <div className="absolute top-4 left-4 right-14 z-[1000]">
-                    <form onSubmit={handleSearch} className="relative group">
+                    <div className="relative group">
                         <div className="absolute inset-x-0 -bottom-2 bg-black/10 blur-lg h-8 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                        <div className="relative flex items-center bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20">
+                        <form onSubmit={handleSearch} className="relative flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20">
                             <Search className="w-4 h-4 ml-4 text-slate-400" />
                             <Input
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setShowSuggestions(true);
+                                }}
+                                onFocus={() => setShowSuggestions(true)}
                                 placeholder="Search parking near..."
                                 className="bg-transparent border-none focus-visible:ring-0 text-sm h-11 placeholder:text-slate-400 placeholder:font-medium"
                             />
@@ -194,8 +249,31 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                                     <X className="w-4 h-4" />
                                 </button>
                             )}
-                        </div>
-                    </form>
+                        </form>
+
+                        {/* Suggestions List */}
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className="absolute mt-2 inset-x-0 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 overflow-hidden divide-y divide-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {suggestions.map((s) => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => selectSuggestion(s)}
+                                        className="w-full px-5 py-4 text-left hover:bg-slate-50 transition-colors flex items-start gap-3 group"
+                                    >
+                                        <MapPin className="w-4 h-4 text-slate-400 group-hover:text-primary mt-0.5 shrink-0" />
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="text-xs font-bold text-slate-800 truncate uppercase tracking-tight">
+                                                {s.place_name.split(',')[0]}
+                                            </p>
+                                            <p className="text-[10px] text-slate-500 truncate uppercase opacity-60">
+                                                {s.place_name.split(',').slice(1).join(',')}
+                                            </p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
