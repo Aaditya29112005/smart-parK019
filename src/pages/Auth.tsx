@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Lock, Mail, Loader2, Car } from "lucide-react";
+import { Lock, Mail, Loader2, Car, BrainCircuit, User, ArrowLeft } from "lucide-react";
 
 export default function Auth() {
     const [email, setEmail] = useState("");

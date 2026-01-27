@@ -315,15 +315,30 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                 )}
             </MapContainer>
 
-            {/* Recenter Button */}
-            {!hideRecenter && (
-                <Button
-                    className="absolute bottom-6 right-6 w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95 z-[1000]"
-                    onClick={recenter}
-                >
-                    <Navigation className="w-5 h-5 text-white" />
-                </Button>
-            )}
+            {/* Recenter & Navigate Buttons */}
+            <div className="absolute bottom-6 right-6 flex flex-col gap-3 z-[1000]">
+                {searchResults && (
+                    <Button
+                        className="h-12 px-6 rounded-2xl bg-white/95 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center gap-2 text-primary hover:bg-white active:scale-95 transition-all"
+                        onClick={() => {
+                            const url = `https://www.google.com/maps/dir/?api=1&destination=${searchResults.lat},${searchResults.lng}`;
+                            window.open(url, '_blank');
+                        }}
+                    >
+                        <Navigation className="w-4 h-4 fill-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Start Nav</span>
+                    </Button>
+                )}
+
+                {!hideRecenter && (
+                    <Button
+                        className="w-12 h-12 rounded-2xl gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95 self-end"
+                        onClick={recenter}
+                    >
+                        <Navigation className="w-5 h-5 text-white" />
+                    </Button>
+                )}
+            </div>
 
             <style>
                 {`
