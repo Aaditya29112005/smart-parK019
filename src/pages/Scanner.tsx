@@ -6,22 +6,35 @@ import { Button } from "@/components/ui/button";
 import { StorageService, Vehicle } from "@/lib/storage";
 import { toast } from "sonner";
 
+const SCAN_HUBS = [
+  "Phoenix Palladium - Lower Parel",
+  "Jio World Drive - BKC",
+  "Inorbit Mall - Malad",
+  "Oberoi Mall - Goregaon",
+  "Select CITYWALK - Saket",
+  "DLF CyberHub - Gurgaon"
+];
+
 const Scanner = () => {
   const navigate = useNavigate();
   const [selectedVehicle, setSelectedVehicle] = useState<number | null>(null);
   const [scanning, setScanning] = useState(true);
   const [isDetecting, setIsDetecting] = useState(true);
-  const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
+  const [detectedHubs, setDetectedHubs] = useState<string[]>([]);
+  const [selectedHub, setSelectedHub] = useState<string>("");
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
     setVehicles(StorageService.getVehicles());
 
-    // Simulate location detection
+    // Simulate multi-location detection
     const timer = setTimeout(() => {
       setIsDetecting(false);
-      setDetectedLocation("Inorbit Mall - Malad");
-      toast.info("Location detected: Inorbit Mall");
+      const shuffled = [...SCAN_HUBS].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 3);
+      setDetectedHubs(selected);
+      setSelectedHub(selected[0]);
+      toast.info("Active Hubs Detected");
     }, 2500);
 
     return () => clearTimeout(timer);
@@ -42,7 +55,7 @@ const Scanner = () => {
 
     // Slight delay for feedback
     setTimeout(() => {
-      navigate("/confirm-parking", { state: { vehicle, location: detectedLocation } });
+      navigate("/confirm-parking", { state: { vehicle, location: selectedHub } });
     }, 500);
   };
 
@@ -60,8 +73,8 @@ const Scanner = () => {
             <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/30">
               <Loader2 className="w-10 h-10 text-primary animate-spin" />
             </div>
-            <p className="text-white font-medium tracking-wide text-sm uppercase tracking-widest">Detecting Location...</p>
-            <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-2 px-6 py-1 bg-white/5 rounded-full">Accessing GPS data</p>
+            <p className="text-white font-medium tracking-wide text-sm uppercase tracking-widest">Scanning Frequencies...</p>
+            <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-2 px-6 py-1 bg-white/5 rounded-full">Triangulating Hubs</p>
           </div>
         ) : (
           <div className="w-64 h-64 relative z-10 animate-in fade-in zoom-in duration-700">
@@ -82,9 +95,23 @@ const Scanner = () => {
         )}
 
         {!isDetecting && (
-          <div className="absolute bottom-10 bg-black/60 px-5 py-2.5 rounded-2xl backdrop-blur-md border border-white/10 flex items-center gap-2 animate-in slide-in-from-bottom duration-500 shadow-2xl">
-            <MapPin className="w-3.5 h-3.5 text-primary" />
-            <span className="text-white text-[11px] font-black uppercase tracking-widest">{detectedLocation}</span>
+          <div className="absolute bottom-10 left-0 right-0 px-6 animate-in slide-in-from-bottom duration-500">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-4 overflow-x-auto scrollbar-hide flex gap-3">
+              {detectedHubs.map((hub) => (
+                <button
+                  key={hub}
+                  onClick={() => setSelectedHub(hub)}
+                  className={`flex-shrink-0 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${selectedHub === hub
+                    ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
+                    : "bg-white/5 text-white/50 hover:bg-white/10"
+                    }`}
+                >
+                  <MapPin className={`w-3 h-3 ${selectedHub === hub ? "text-white" : "text-primary"}`} />
+                  {hub}
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mt-3">Select detected anchor hub</p>
           </div>
         )}
       </div>
@@ -105,7 +132,7 @@ const Scanner = () => {
           Choose a registered vehicle to proceed
         </p>
 
-        <div className="space-y-3 mb-8 max-h-[240px] overflow-y-auto pr-1">
+        <div className="space-y-3 mb-8 max-h-[240px] overflow-y-auto pr-1 scrollbar-hide">
           {vehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
@@ -116,18 +143,17 @@ const Scanner = () => {
             />
           ))}
           {vehicles.length === 0 && (
-            <div className="text-center py-8 rounded-2xl bg-muted/30 border border-dashed border-border">
-              <p className="text-sm text-muted-foreground">No vehicles found</p>
+            <div className="text-center py-8 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No units found</p>
             </div>
           )}
         </div>
 
         <Button
           onClick={() => navigate("/add-vehicle")}
-          variant="outline"
-          className="w-full border-2 border-dashed border-primary/30 text-primary hover:bg-primary/5 h-12 rounded-xl mb-2"
+          className="w-full h-14 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 text-primary text-xs font-black uppercase tracking-widest hover:bg-primary/10 transition-colors"
         >
-          + Register New Vehicle
+          + Authorize New Unit
         </Button>
       </div>
     </div>

@@ -20,13 +20,14 @@ const ConfirmParking = () => {
   const [selectedPayment, setSelectedPayment] = useState("upi");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Get vehicle from state or callback to default
+  // Get vehicle and location from state
   const vehicle = location.state?.vehicle || {
     id: 1,
     name: "Toyota Camry",
     plateNumber: "MH 12 AB 1234",
     ownerName: "John Doe"
   };
+  const locationName = location.state?.location || "Inorbit Mall";
 
   const costBreakdown = {
     baseRate: 120,
@@ -40,7 +41,7 @@ const ConfirmParking = () => {
 
     // Simulate payment processing
     setTimeout(() => {
-      const session = StorageService.startSession(vehicle);
+      const session = StorageService.startSession(vehicle, locationName);
       setIsProcessing(false);
       toast.success("Payment Successful!");
       navigate("/ticket", { state: { session, vehicle } });
