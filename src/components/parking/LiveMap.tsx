@@ -55,6 +55,7 @@ interface LiveMapProps {
 
 export interface LiveMapRef {
     recenter: () => void;
+    search: (query: string) => Promise<void>;
 }
 
 const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hideRecenter = false }, ref) => {
@@ -76,27 +77,13 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         }
     }, [liveLat, liveLng]);
 
-    useImperativeHandle(ref, () => ({
-        recenter
-    }));
-
-    useEffect(() => {
-        if (liveLat && liveLng && !searchResults) {
-            setView({
-                center: [liveLat, liveLng],
-                zoom: 16
-            });
-        }
-    }, [liveLat, liveLng, searchResults]);
-
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
+    const executeSearch = useCallback(async (query: string) => {
+        if (!query.trim()) return;
+        setSearchQuery(query);
 
         try {
-            // Geocoding using Mapbox API
             const geoResponse = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}`
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`
             );
             const geoData = await geoResponse.json();
 
@@ -105,14 +92,12 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
                 const name = geoData.features[0].place_name;
                 setSearchResults({ lat: destLat, lng: destLng, name });
 
-                // Directions using Mapbox API
                 if (liveLat && liveLng) {
                     const directionsResponse = await fetch(
                         `https://api.mapbox.com/directions/v5/mapbox/driving/${liveLng},${liveLat};${destLng},${destLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
                     );
                     const directionsData = await directionsResponse.json();
                     if (directionsData.routes && directionsData.routes.length > 0) {
-                        // Leaflet uses [lat, lng] while GeoJSON uses [lng, lat]
                         const coords = directionsData.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
                         setRouteCoords(coords);
                     }
@@ -126,6 +111,25 @@ const LiveMap = forwardRef<LiveMapRef, LiveMapProps>(({ hideSearch = false, hide
         } catch (err) {
             console.error("Search or routing failed:", err);
         }
+    }, [liveLat, liveLng]);
+
+    useImperativeHandle(ref, () => ({
+        recenter,
+        search: executeSearch
+    }));
+
+    useEffect(() => {
+        if (liveLat && liveLng && !searchResults) {
+            setView({
+                center: [liveLat, liveLng],
+                zoom: 16
+            });
+        }
+    }, [liveLat, liveLng, searchResults]);
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        executeSearch(searchQuery);
     };
 
     const clearSearch = () => {
