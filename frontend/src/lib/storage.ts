@@ -107,12 +107,23 @@ const DEMO_SESSIONS: ParkingSession[] = [
 export const StorageService = {
     // ==================== VEHICLES ====================
     getVehicles: async (): Promise<Vehicle[]> => {
-        const fetchLocal = () => {
-            const data = localStorage.getItem(STORAGE_KEYS.VEHICLES);
-            return data ? JSON.parse(data) : DEMO_VEHICLES;
-        };
+        // Always fetch local data, do not use default demo data for merging
+        const localData = getLocalValues<Vehicle>(STORAGE_KEYS.VEHICLES);
 
-        if (isDemo()) return fetchLocal();
+        if (isDemo()) {
+            // Only if local is explicitly empty do we use defaults in demo mode? 
+            // Or logic remains: if no local, use defaults.
+            // But getLocalValues returns [] if empty.
+            const stored = localStorage.getItem(STORAGE_KEYS.VEHICLES);
+            return stored ? JSON.parse(stored) : DEMO_VEHICLES;
+        }
+
+        const userId = await getUserId();
+        // If no user, fallback to local (demo/offline) behavior
+        if (!userId) {
+            const stored = localStorage.getItem(STORAGE_KEYS.VEHICLES);
+            return stored ? JSON.parse(stored) : DEMO_VEHICLES;
+        }
 
         try {
             const { data, error } = await supabase
@@ -121,10 +132,31 @@ export const StorageService = {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return (data as DbVehicle[]).map(dbToVehicle);
+            const remoteVehicles = (data as DbVehicle[]).map(dbToVehicle);
+
+            // MERGE: Combine remote and local, unique by ID
+            // Local items (that failed to sync) often have numeric IDs from Date.now()
+            // Remote items usually have numeric IDs from SQL sequence. 
+            // We use a Map to dedup by ID.
+            const merged = new Map<number, Vehicle>();
+
+            // Add remote first
+            remoteVehicles.forEach(v => merged.set(v.id, v));
+            // Add local second (preserves local edits if ID matches, or adds if missing)
+            // Ideally we want remote to win if same ID, but local to exist if failing to sync?
+            // If sync failed, it was a NEW item with a NEW ID. So no collision.
+            localData.forEach(v => {
+                if (!merged.has(v.id)) merged.set(v.id, v);
+            });
+
+            return Array.from(merged.values()).sort((a, b) => b.id - a.id); // Sort desc
+
         } catch (error) {
             console.error('Error fetching vehicles, falling back to local:', error);
-            return fetchLocal();
+            // Fallback: return strictly local data (or demo defaults if empty?)
+            // If error, we are effectively offline.
+            const stored = localStorage.getItem(STORAGE_KEYS.VEHICLES);
+            return stored ? JSON.parse(stored) : DEMO_VEHICLES;
         }
     },
 
@@ -183,12 +215,18 @@ export const StorageService = {
 
     // ==================== DRIVERS ====================
     getDrivers: async (): Promise<Driver[]> => {
-        const fetchLocal = () => {
-            const data = localStorage.getItem(STORAGE_KEYS.DRIVERS);
-            return data ? JSON.parse(data) : DEMO_DRIVERS;
-        };
+        const localData = getLocalValues<Driver>(STORAGE_KEYS.DRIVERS);
 
-        if (isDemo()) return fetchLocal();
+        if (isDemo()) {
+            const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
+            return stored ? JSON.parse(stored) : DEMO_DRIVERS;
+        }
+
+        const userId = await getUserId();
+        if (!userId) {
+            const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
+            return stored ? JSON.parse(stored) : DEMO_DRIVERS;
+        }
 
         try {
             const { data, error } = await supabase
@@ -197,9 +235,19 @@ export const StorageService = {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return (data as DbDriver[]).map(dbToDriver);
+            const remoteDrivers = (data as DbDriver[]).map(dbToDriver);
+
+            // MERGE
+            const merged = new Map<number, Driver>();
+            remoteDrivers.forEach(d => merged.set(d.id, d));
+            localData.forEach(d => {
+                if (!merged.has(d.id)) merged.set(d.id, d);
+            });
+
+            return Array.from(merged.values()).sort((a, b) => b.id - a.id);
         } catch (error) {
-            return fetchLocal();
+            const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
+            return stored ? JSON.parse(stored) : DEMO_DRIVERS;
         }
     },
 
@@ -254,18 +302,52 @@ export const StorageService = {
         }
     },
 
+    // Update driver status (Approve/Reject)
+    updateDriverStatus: async (id: number, status: 'approved' | 'rejected'): Promise<void> => {
+        const updateLocal = async () => {
+            const drivers = await StorageService.getDrivers();
+            const updated = drivers.map(d =>
+                d.id === id ? { ...d, status } : d
+            );
+            saveLocalValue(STORAGE_KEYS.DRIVERS, updated);
+        };
+
+        if (isDemo()) return updateLocal();
+
+        try {
+            const { error } = await supabase
+                .from('drivers')
+                .update({ status })
+                .eq('id', id);
+
+            if (error) throw error;
+            notify();
+        } catch {
+            return updateLocal();
+        }
+    },
+
     // ==================== PARKING SESSIONS ====================
     getSessions: async (): Promise<ParkingSession[]> => {
-        const fetchLocal = () => {
-            const data = localStorage.getItem(STORAGE_KEYS.SESSIONS);
-            if (!data) {
+        const localData = getLocalValues<ParkingSession>(STORAGE_KEYS.SESSIONS);
+
+        if (isDemo()) {
+            const stored = localStorage.getItem(STORAGE_KEYS.SESSIONS);
+            if (!stored) {
                 saveLocalValue(STORAGE_KEYS.SESSIONS, DEMO_SESSIONS);
                 return DEMO_SESSIONS;
             }
-            return JSON.parse(data);
-        };
+            return JSON.parse(stored);
+        }
 
-        if (isDemo()) return fetchLocal();
+        const userId = await getUserId();
+        if (!userId) {
+            const stored = localStorage.getItem(STORAGE_KEYS.SESSIONS);
+            // Similar logic for demo seeding if completely empty? 
+            // Maybe safer to not seed in fallback mode to avoid confusion.
+            if (!stored) return DEMO_SESSIONS;
+            return JSON.parse(stored);
+        }
 
         try {
             const { data, error } = await supabase
@@ -274,9 +356,25 @@ export const StorageService = {
                 .order('entry_time', { ascending: false });
 
             if (error) throw error;
-            return (data as DbParkingSession[]).map(dbToSession);
+            const remoteSessions = (data as DbParkingSession[]).map(dbToSession);
+
+            // MERGE
+            // Sessions use string IDs
+            const merged = new Map<string, ParkingSession>();
+            remoteSessions.forEach(s => merged.set(s.id, s));
+            localData.forEach(s => {
+                if (!merged.has(s.id)) merged.set(s.id, s);
+            });
+
+            // Sort by entryTime desc
+            return Array.from(merged.values()).sort((a, b) =>
+                new Date(b.entryTime).getTime() - new Date(a.entryTime).getTime()
+            );
+
         } catch (error) {
-            return fetchLocal();
+            const stored = localStorage.getItem(STORAGE_KEYS.SESSIONS);
+            if (!stored) return DEMO_SESSIONS;
+            return JSON.parse(stored);
         }
     },
 

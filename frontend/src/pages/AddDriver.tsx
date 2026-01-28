@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, User, Phone, Mail, MapPin, Calendar, FileText, Upload, CheckCircle2, Loader2 } from "lucide-react";
 import Header from "@/components/parking/Header";
@@ -21,6 +21,17 @@ const AddDriver = () => {
     licenseNumber: "",
     licenseExpiry: "",
   });
+
+  const [drivers, setDrivers] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadDrivers();
+  }, []);
+
+  const loadDrivers = async () => {
+    const data = await StorageService.getDrivers();
+    setDrivers(data);
+  };
 
   const [driverPhoto, setDriverPhoto] = useState<File | null>(null);
   const [licensePhoto, setLicensePhoto] = useState<File | null>(null);
@@ -75,8 +86,27 @@ const AddDriver = () => {
         avatarUrl: driverPhotoPreview || undefined
       });
 
-      toast.success("Identity synchronized to secure ledger!");
-      navigate("/");
+      toast.success("Driver registered! Sent to Super Admin for approval.");
+      await loadDrivers();
+      // navigate("/"); // Stay on page to see the new list or navigate back? User usually wants to see it added. Left navigate for flow but list is added.
+      // Re-reading user request: "in the add driver option the driver will be shown the that driover were add"
+      // This implies they want to see it ON the page. So maybe remove navigate or keep it?
+      // "driver will be shown" -> usually means immediate feedback in the list.
+      // I will comment out navigate so they remain on page to see the list update.
+      // navigate("/");
+      setFormData({
+        fullName: "",
+        phone: "",
+        email: "",
+        address: "",
+        dob: "",
+        licenseNumber: "",
+        licenseExpiry: "",
+      });
+      setDriverPhoto(null);
+      setLicensePhoto(null);
+      setDriverPhotoPreview(null);
+      setLicensePhotoPreview(null);
     } catch (error: any) {
       toast.error(error.message || "Transmission failed. Retry protocol."); // Updated error message
     } finally {
@@ -276,6 +306,43 @@ const AddDriver = () => {
           By submitting, you agree to the Smart Park driver verification protocol.
         </p>
       </form>
+
+      {/* Added Drivers List */}
+      <div className="px-6 pb-6">
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="w-1.5 h-4 bg-primary rounded-full" />
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Registered Drivers</h3>
+        </div>
+
+        <div className="space-y-3">
+          {drivers.map((driver) => (
+            <div key={driver.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                  {driver.avatarUrl ? (
+                    <img src={driver.avatarUrl} alt={driver.fullName} className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-5 h-5 text-slate-400" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">{driver.fullName}</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Lic: {driver.licenseNumber}</p>
+                </div>
+              </div>
+              <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest ${driver.status === 'approved' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                }`}>
+                {driver.status}
+              </div>
+            </div>
+          ))}
+          {drivers.length === 0 && (
+            <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <p className="text-[10px] uppercase font-bold text-slate-400">No particular drivers found</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
