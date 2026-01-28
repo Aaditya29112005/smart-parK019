@@ -31,11 +31,54 @@ const Ticket = () => {
     }
   };
 
-  const handleAction = (action: string) => {
-    toast.info(`${action} simulation started...`);
-    setTimeout(() => {
-      toast.success(`${action} completed!`);
-    }, 1500);
+  const downloadPDF = async () => {
+    const ticketElement = document.getElementById("ticket-view");
+    if (!ticketElement) return;
+
+    try {
+      toast.info("Generating PDF ticket...");
+
+      // Dynamic import to avoid SSR issues if any, and ensuring standard loading
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(ticketElement, {
+        scale: 2, // Higher resolution
+        backgroundColor: "#ffffff",
+        useCORS: true, // Handle images if any
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`SmartPark-Ticket-${session?.id || 'new'}.pdf`);
+
+      toast.success("Ticket downloaded successfully!");
+    } catch (error) {
+      console.error("PDF Download failed", error);
+      toast.error("Failed to generate PDF");
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Parking Ticket',
+        text: `Parking Simulation Ticket ID: ${session?.id}`,
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      toast.info("Sharing simulation started...");
+      setTimeout(() => toast.success("Shared successfully!"), 1500);
+    }
   };
 
   if (!session) {
@@ -53,7 +96,7 @@ const Ticket = () => {
     <div className="bg-background pb-20">
       {/* Ticket Card */}
       <div className="px-4 pt-10">
-        <div className="bg-card rounded-3xl shadow-card overflow-hidden">
+        <div id="ticket-view" className="bg-card rounded-3xl shadow-card overflow-hidden">
           {/* Header Status */}
           <div className={`py-4 px-6 flex items-center justify-between ${session.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
             <div className="flex items-center gap-2">
@@ -146,16 +189,16 @@ const Ticket = () => {
           <Button
             variant="outline"
             className="rounded-2xl h-12 border-2"
-            onClick={() => handleAction("Download")}
+            onClick={downloadPDF}
           >
             <Download className="w-4 h-4 mr-2" />
-            Download
+            PDF Ticket
           </Button>
 
           <Button
             variant="outline"
             className="rounded-2xl h-12 border-2"
-            onClick={() => handleAction("Share")}
+            onClick={handleShare}
           >
             <Share2 className="w-4 h-4 mr-2" />
             Share
