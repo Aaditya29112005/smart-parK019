@@ -5,6 +5,9 @@ import ParkingCard from "@/components/parking/ParkingCard";
 import { StorageService, ParkingSession } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import LiveMap from "@/components/parking/LiveMap";
+import Tilt from "react-parallax-tilt";
+import { motion } from "framer-motion";
+import { DynamicIsland } from "@/components/ui/DynamicIsland";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -30,99 +33,128 @@ const Home = () => {
   };
 
   return (
-    <div className="bg-background">
+    <div className="bg-background bg-aurora min-h-screen relative overflow-x-hidden">
+      {/* Dynamic Status Island */}
+      <DynamicIsland state={activeSession ? 'active-session' : 'idle'} />
+
       {/* Premium Header */}
-      <div className="gradient-header px-6 pt-16 pb-20 rounded-b-[3rem] relative">
+      <div className="gradient-header px-6 pt-24 pb-24 rounded-b-[3.5rem] relative shadow-2xl z-10 block">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <p className="text-primary-foreground/70 text-xs font-bold uppercase tracking-widest">Good Morning</p>
-            <h1 className="text-primary-foreground text-3xl font-black">Find Space</h1>
+            <h1 className="text-primary-foreground text-4xl font-black tracking-tight">Pixel Park</h1>
           </div>
-          <div className="w-12 h-12 bg-white/20 rounded-2xl backdrop-blur-md border border-white/30 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-white/30 transition-colors">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 10 }}
+            whileTap={{ scale: 0.9 }}
+            className="w-12 h-12 bg-white/20 rounded-2xl backdrop-blur-md border border-white/30 flex items-center justify-center flex-shrink-0 cursor-pointer shadow-lg"
+          >
             <Search className="w-6 h-6 text-primary-foreground" />
-          </div>
+          </motion.div>
         </div>
 
         {/* Search Bar - Navigates to Map View */}
-        <div
-          onClick={() => navigate("/map")}
-          className="w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-4 border border-white/20 shadow-xl mb-4 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-all active:scale-[0.98] group"
+        <Tilt
+          tiltMaxAngleX={5}
+          tiltMaxAngleY={5}
+          perspective={1000}
+          scale={1.02}
+          className="perspective-1000"
         >
-          <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-            <Search className="w-5 h-5" />
+          <div
+            onClick={() => navigate("/map")}
+            className="glass-panel rounded-[2.5rem] p-5 shadow-2xl mb-4 flex items-center gap-4 cursor-pointer hover:bg-white/40 transition-all group relative overflow-hidden"
+          >
+            {/* Shimmer Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
+              <Search className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <p className="text-primary-foreground/60 text-[10px] font-black uppercase tracking-widest">Quick Navigation</p>
+              <h3 className="text-white text-lg font-black uppercase tracking-tight">Find Parking Space</h3>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white backdrop-blur-sm">
+              <ChevronRight className="w-6 h-6" />
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-primary-foreground/50 text-[10px] font-black uppercase tracking-widest">Quick View</p>
-            <h3 className="text-primary-foreground text-sm font-black uppercase">Search parking near me</h3>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-primary-foreground/50">
-            <ChevronRight className="w-5 h-5" />
-          </div>
-        </div>
+        </Tilt>
 
         {/* Floating Active Card */}
         {activeSession && (
-          <div className="absolute left-6 right-6 -bottom-10 z-10 animate-in slide-in-from-bottom-4 duration-700">
-            <div
-              onClick={() => navigate("/ticket")}
-              className="bg-white rounded-[2rem] p-5 shadow-2xl flex items-center justify-between border border-primary/5 cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center relative">
-                  <Car className="w-7 h-7 text-white" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 border-4 border-white rounded-full" />
+          <div className="absolute left-6 right-6 -bottom-12 z-20">
+            <Tilt tiltMaxAngleX={3} tiltMaxAngleY={3} scale={1.02}>
+              <div
+                onClick={() => navigate("/ticket")}
+                className="glass-panel bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border-white/50 flex items-center justify-between cursor-pointer"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center relative shadow-lg shadow-primary/20">
+                    <Car className="w-8 h-8 text-white relative z-10" />
+                    <div className="absolute inset-0 bg-primary rounded-2xl animate-ping opacity-20" />
+                    <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-green-400 border-[3px] border-white rounded-full z-20" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-md">Live Session</span>
+                    </div>
+                    <h3 className="font-black text-slate-800 text-xl leading-tight uppercase mt-1">{activeSession.vehicleName}</h3>
+                    <div className="flex items-center gap-1.5 text-slate-500 mt-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span className="text-xs font-bold uppercase tracking-tight">{activeSession.location}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-primary">Ongoing Session</span>
-                  </div>
-                  <h3 className="font-black text-foreground text-lg leading-tight uppercase">{activeSession.vehicleName}</h3>
-                  <div className="flex items-center gap-1.5 text-muted-foreground mt-0.5">
-                    <MapPin className="w-3 h-3" />
-                    <span className="text-[11px] font-bold uppercase tracking-tight">{activeSession.location}</span>
-                  </div>
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <ChevronRight className="w-6 h-6" />
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
+            </Tilt>
           </div>
         )}
 
         {!activeSession && (
-          <div className="absolute left-6 right-6 -bottom-10 z-10">
-            <div className="bg-primary-foreground rounded-[2rem] p-6 shadow-2xl border border-primary/5 flex items-center gap-4">
-              <div className="flex-1">
-                <h3 className="font-black text-primary text-lg leading-tight uppercase">Ready to park?</h3>
-                <p className="text-muted-foreground text-xs font-bold leading-relaxed mt-1">Scan the QR code at any of our outlets to begin.</p>
+          <div className="absolute left-6 right-6 -bottom-10 z-20">
+            <Tilt tiltMaxAngleX={2} tiltMaxAngleY={2} scale={1.01}>
+              <div className="glass-panel bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border-white/50 flex items-center gap-4">
+                <div className="flex-1">
+                  <h3 className="font-black text-slate-800 text-lg leading-tight uppercase">Ready to park?</h3>
+                  <p className="text-slate-500 text-xs font-bold leading-relaxed mt-1">Scan the QR code to begin.</p>
+                </div>
+                <Button
+                  onClick={() => navigate("/scanner")}
+                  className="bg-primary hover:bg-primary/90 text-white rounded-2xl px-8 h-12 font-black uppercase text-xs shadow-lg shadow-primary/25"
+                >
+                  Scan
+                </Button>
               </div>
-              <Button
-                onClick={() => navigate("/scanner")}
-                className="bg-primary text-white rounded-2xl px-6 h-12 font-black uppercase text-xs"
-              >
-                Scan Now
-              </Button>
-            </div>
+            </Tilt>
           </div>
         )}
       </div>
 
-      <div className="px-6 mt-16 pb-2">
+      <div className="px-6 mt-20 pb-2 relative z-0">
         {/* Quick Actions / Intelligence Dashboard */}
         <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Revenue</span>
-            <p className="text-sm font-black text-primary">₹{analytics.totalRevenue}</p>
-          </div>
-          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Active</span>
-            <p className="text-sm font-black text-primary">{analytics.activeCount} Unit</p>
-          </div>
-          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Sessions</span>
-            <p className="text-sm font-black text-primary">{analytics.historyCount}+</p>
-          </div>
+          <Tilt scale={1.05} tiltMaxAngleX={10} tiltMaxAngleY={10}>
+            <div className="glass-panel bg-white/60 rounded-3xl p-4 flex flex-col items-center justify-center text-center h-full border-white/60 shadow-sm hover:shadow-xl transition-all">
+              <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Revenue</span>
+              <p className="text-lg font-black text-primary">₹{analytics.totalRevenue}</p>
+            </div>
+          </Tilt>
+          <Tilt scale={1.05} tiltMaxAngleX={10} tiltMaxAngleY={10}>
+            <div className="glass-panel bg-white/60 rounded-3xl p-4 flex flex-col items-center justify-center text-center h-full border-white/60 shadow-sm hover:shadow-xl transition-all">
+              <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">Active</span>
+              <p className="text-lg font-black text-primary">{analytics.activeCount}</p>
+            </div>
+          </Tilt>
+          <Tilt scale={1.05} tiltMaxAngleX={10} tiltMaxAngleY={10}>
+            <div className="glass-panel bg-white/60 rounded-3xl p-4 flex flex-col items-center justify-center text-center h-full border-white/60 shadow-sm hover:shadow-xl transition-all">
+              <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">History</span>
+              <p className="text-lg font-black text-primary">{analytics.historyCount}</p>
+            </div>
+          </Tilt>
         </div>
 
         {/* Quick Actions / Featured Sites */}
